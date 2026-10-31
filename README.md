@@ -2,6 +2,8 @@
 
 Template para publicar **un catálogo de tus servicios** (y, como extra, productos o mercancías), utilizando la capa gratuita de Cloudflare. Pensado para profesionales independientes, emprendedores y proyectos personales o de hobby.
 
+El catálogo se publica **sin costo** en una dirección de Cloudflare del tipo `https://<proyecto>.<subdominio>.workers.dev` (el `<subdominio>` es personalizable, pero si no lo configuras, es uno aleatorio). Si prefieres una dirección propia, como `www.mi-nombre.com`, puedes configurarla después de desplegar: **el dominio se compra aparte y tiene un costo** (normalmente anual, según la extensión y dónde lo compres); lo demás sigue usando la capa gratuita de GitHub y Cloudflare. Detalles en [Publicar tu sitio](#publicar-tu-sitio) y [Usar tu propio dominio](#usar-tu-propio-dominio).
+
 **No es una tienda online** ni pretende competir con Shopify o WooCommerce: no hay pasarela de pago, stock, impuestos ni envíos. Quien te visita te consulta o reserva una cita, y el cierre de las ventas lo acuerdas tú por WhatsApp.
 
 Cada persona hace su propio fork y despliega su propia instancia. No es un SaaS multi-inquilino.
@@ -15,7 +17,7 @@ Cada persona hace su propio fork y despliega su propia instancia. No es un SaaS 
 - **Portada editable:** portada, textos, destacados, galería, *Sobre mí* con foto, testimonios, contacto y color de acento propio.
 - **FAQ**, **SEO** (título, descripción, vista previa al compartir, datos estructurados, sitemap) y analítica opcional sin cookies (Cloudflare Web Analytics).
 - **Panel de administración** protegido con contraseña, con límite de intentos y subida de fotos optimizada.
-- Frontend en HTML, CSS y JavaScript puros; todo en la capa gratuita de Cloudflare (Workers con archivos estáticos y Workers KV).
+- Frontend en HTML, CSS y JavaScript puros; todo en la capa gratuita de GitHub y Cloudflare, sin costo salvo el dominio propio si decides usarlo (Workers con archivos estáticos y Workers KV).
 
 ## SEO: cómo te encuentran en Google y cómo se ve al compartir
 
@@ -80,7 +82,7 @@ Dos retrasos normales:
 - Rellena la **Dirección** si atiendes en un lugar físico.
 - Sube **una foto por servicio o producto**: es la imagen de la vista previa al compartir. Mantenla ligera (unos 300 KB o menos); el panel ya la reduce a JPEG de 1200 px y unos 250 KB, porque WhatsApp no muestra fotos WebP ni muy pesadas.
 - Mantén el **FAQ** con preguntas reales de tus clientes.
-- Con un **dominio propio** el sitio gana en confianza ante clientes y buscadores (ver [Usar tu propio dominio](#usar-tu-propio-dominio)).
+- Con un **dominio propio** (opcional; el dominio tiene un costo) el sitio gana en confianza ante clientes y buscadores (ver [Usar tu propio dominio](#usar-tu-propio-dominio)).
 
 ### Lo que no hace a propósito
 
@@ -119,6 +121,8 @@ En `config/paquetes/` hay tres paquetes completos listos para importar desde **A
 
 El botón copia el proyecto a tu GitHub, crea los dos almacenes KV y despliega el Worker. Sigue la **[guía paso a paso en capagratuita.com](https://capagratuita.com)**: sin terminal. Para traer mejoras del template después, instala una vez el workflow *Sincronizar con el template* (el botón no copia `.github/`; la guía de capagratuita.com explica cómo) y ejecútalo a mano desde la pestaña Actions.
 
+El sitio queda publicado **sin costo** en una dirección `https://<proyecto>.<subdominio>.workers.dev` (el `<subdominio>` es aleatorio si no lo has configurado en tu cuenta de Cloudflare). Si luego quieres una dirección propia, que sí tiene costo por el dominio, mira [Usar tu propio dominio](#usar-tu-propio-dominio).
+
 ### Notas del despliegue con el botón
 
 - El botón **no hace fork**: copia el proyecto a tu cuenta de GitHub (historial nuevo) y crea el Worker con Workers Builds (`npm run deploy` = `wrangler deploy`). Un build creado así no se puede reintentar; para redesplegar hace falta un commit.
@@ -131,15 +135,17 @@ El botón copia el proyecto a tu GitHub, crea los dos almacenes KV y despliega e
 
 ## Usar tu propio dominio
 
-Por defecto el sitio vive en una dirección `https://<proyecto>.<subdominio>.workers.dev`. El `<subdominio>` es el de tu cuenta de Cloudflare: si nunca lo configuraste, Cloudflare te asigna uno **al azar** (como `mute-haze-3d90`), no uno con tu nombre. Puedes cambiarlo en *Workers & Pages* → *Account details* → *Subdomain*, pero conviene hacerlo **antes** de desplegar: después la dirección vieja deja de servir y la nueva tarda un par de minutos en tener certificado. Un dominio propio (`www.tunegocio.com`) es más fácil de recordar y transmite más confianza a clientes y buscadores.
+Por defecto el sitio se publica **sin costo** en `https://<proyecto>.<subdominio>.workers.dev`. El `<subdominio>` es personalizable, pero si no lo configuras Cloudflare te asigna uno **al azar** (como `mute-haze-3d90`), no uno con tu nombre. Puedes cambiarlo en *Workers & Pages* → *Account details* → *Subdomain*, pero conviene hacerlo **antes** de desplegar: después la dirección vieja deja de servir y la nueva tarda un par de minutos en tener certificado de seguridad y estar disponible.
+
+Un dominio propio (`www.mi-nombre.com`) es opcional y se configura **después de desplegar**. **El dominio se compra aparte y tiene un costo** (normalmente anual, según la extensión y dónde lo compres); lo demás sigue usando la capa gratuita de GitHub y Cloudflare. A cambio es más fácil de recordar y transmite más confianza a clientes y buscadores.
 
 ### Cómo conectarlo
 
-1. El dominio debe estar en tu cuenta de Cloudflare (comprado ahí o con sus nameservers apuntando a Cloudflare).
+1. El dominio debe estar en tu cuenta de Cloudflare (registrado ahí o con sus nameservers apuntando a Cloudflare).
 2. Entra al Worker: *Workers & Pages* → tu proyecto → *Settings* → *Domains & Routes* → *Add* → *Custom domain*, y escribe el dominio.
 3. Cloudflare crea el registro DNS y el certificado HTTPS solos; puede tardar unos minutos.
 
-Estos pasos son los de Cloudflare para cualquier Worker; no se han probado en este proyecto y los menús pueden cambiar. No hace falta tocar `wrangler.jsonc` ni el código.
+Estos pasos son los de Cloudflare para cualquier Worker. No hace falta tocar `wrangler.jsonc` ni el código.
 
 ### Qué se adapta solo
 
@@ -150,7 +156,7 @@ Las direcciones que ven Google y las apps de mensajería se generan **con el dom
 - **El sitio sigue respondiendo también en `workers.dev`** (`"workers_dev": true` en `wrangler.jsonc`). Ahí el canonical apunta a esa dirección, así que Google podría ver dos copias. Comparte y publica solo el dominio propio y, cuando funcione bien, apaga `workers.dev` (ver abajo).
 - **La sesión del panel es por dirección:** si entras al panel por tu dominio y por `workers.dev`, tendrás que iniciar sesión en cada una.
 - **Search Console:** verifica el dominio nuevo y envía su `/sitemap.xml` (ver «SEO»). Si ya habías enviado el de `workers.dev`, el nuevo es un sitio distinto para Google.
-- **Cambiar de dirección tiene un costo:** quien tenga guardado el enlace antiguo, o lo haya compartido por WhatsApp, seguirá entrando por `workers.dev`. Conviene conectar el dominio antes de empezar a difundir el sitio.
+- **Cambiar de dirección tiene consecuencias:** quien tenga guardado el enlace antiguo, o lo haya compartido por WhatsApp, seguirá entrando por `workers.dev`. Conviene conectar el dominio antes de empezar a difundir el sitio.
 
 ### Apagar `workers.dev` cuando el dominio ya funciona
 
@@ -160,13 +166,13 @@ Lo habitual en producción es dejar una sola dirección pública. El enlace ofic
 2. Apaga `workers.dev` de una de estas dos formas:
    - En Cloudflare: *Workers & Pages* → tu proyecto → *Settings* → *Domains & Routes* → desactiva la dirección `workers.dev`.
    - En tu repositorio: pon `"workers_dev": false` en `wrangler.jsonc` y haz commit. El workflow de sincronización no sobrescribe `wrangler.jsonc`, así que el cambio se mantiene al traer mejoras del template; sí te avisará de la diferencia.
-3. Cambia las direcciones guardadas (WhatsApp, redes, Search Console) a la del dominio.
+
 
 Tenlo en cuenta antes de apagarla:
 
 - **Déjala encendida al principio.** El botón de despliegue y la guía usan esa dirección, y te sirve de respaldo si algo falla con el dominio.
 - **Si ya la compartiste o Google ya la indexó,** apagarla deja esos enlaces sin respuesta hasta que se actualicen. El proyecto no redirige automáticamente de `workers.dev` al dominio: en ese caso, mantenla encendida unas semanas, publica el dominio nuevo y envía su sitemap en Search Console antes de apagarla.
-- Estos pasos son los de Cloudflare para cualquier Worker; no se han probado en este proyecto y los menús pueden cambiar.
+- Estos pasos son los de Cloudflare para cualquier Worker.
 
 ## Probarlo en tu computador
 
