@@ -131,7 +131,7 @@ El botón copia el proyecto a tu GitHub, crea los dos almacenes KV y despliega e
 
 ## Usar tu propio dominio
 
-Por defecto el sitio vive en una dirección `https://<proyecto>.<tu-cuenta>.workers.dev`. Un dominio propio (`www.tunegocio.com`) es más fácil de recordar y transmite más confianza a clientes y buscadores.
+Por defecto el sitio vive en una dirección `https://<proyecto>.<subdominio>.workers.dev`. El `<subdominio>` es el de tu cuenta de Cloudflare: si nunca lo configuraste, Cloudflare te asigna uno **al azar** (como `mute-haze-3d90`), no uno con tu nombre. Puedes cambiarlo en *Workers & Pages* → *Account details* → *Subdomain*, pero conviene hacerlo **antes** de desplegar: después la dirección vieja deja de servir y la nueva tarda un par de minutos en tener certificado. Un dominio propio (`www.tunegocio.com`) es más fácil de recordar y transmite más confianza a clientes y buscadores.
 
 ### Cómo conectarlo
 
