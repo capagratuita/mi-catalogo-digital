@@ -17,6 +17,75 @@ Cada persona hace su propio fork y despliega su propia instancia. No es un SaaS 
 - **Panel de administración** protegido con contraseña, con límite de intentos y subida de fotos optimizada.
 - Frontend en HTML, CSS y JavaScript puros; todo en la capa gratuita de Cloudflare (Workers con archivos estáticos y Workers KV).
 
+## SEO: cómo te encuentran en Google y cómo se ve al compartir
+
+El SEO viene resuelto de fábrica. No hay que instalar nada ni tocar código: lo que escribes en el panel se convierte en la información que leen Google y las apps de mensajería.
+
+### Qué ve un buscador
+
+Cada página se arma en el servidor en el momento en que se pide, así que **Google recibe el texto ya escrito** y no depende de que el navegador ejecute JavaScript:
+
+- **Portada:** el título y el subtítulo reales, más una lista simple con todos tus servicios y productos. Cuando la página carga para una persona, esa lista se reemplaza por las tarjetas con foto.
+- **Ficha de cada servicio o producto:** su nombre como título principal, la descripción completa y el texto alternativo de la foto.
+- **Preguntas frecuentes:** página propia (`/faq`) con cada pregunta y respuesta.
+
+### Qué lleva cada página
+
+| Elemento | De dónde sale | Detalle |
+|---|---|---|
+| Título | Portada: *Mi página → Apariencia y SEO*. Fichas y FAQ: «Página - Nombre del negocio» | Si pasa de 60 caracteres se usa solo la parte de la página |
+| Descripción | Portada: *Apariencia y SEO*. Fichas: descripción del item | Se recorta a 155 caracteres, sin partir palabras |
+| Enlace oficial (canonical) | Automático | Evita que Google la tome por un duplicado |
+| Vista previa al compartir (WhatsApp, Facebook, Telegram, X) | Foto del item; si no tiene, tu logo | El idioma se ajusta a tu moneda (PEN→Perú, MXN→México, COP, ARS, CLP, EUR→España; otra→genérico en español) |
+| Datos estructurados (JSON-LD) | Perfil, catálogo y FAQ | Ver abajo |
+
+**Datos estructurados** (información ordenada que Google entiende y puede mostrar en sus resultados):
+
+- Tu **negocio y redes**. Si rellenas la **Dirección** en *General*, se marca como **negocio local**, que es lo que Google exige para búsquedas de tu zona. Sin dirección se presenta como organización.
+- Las **zonas donde atiendes**, tomadas de los servicios que no son solo online.
+- Cada **servicio o producto** con su precio. Si un servicio tiene opciones de precio, se indica «desde» el más bajo. Un item marcado como no disponible sigue existiendo, pero figura como agotado.
+- Las **preguntas frecuentes**.
+
+### Direcciones y mapa del sitio
+
+- Cada ficha tiene una dirección limpia: `/servicio/{id}` para servicios y `/producto/{id}` para productos. Las direcciones antiguas (`/producto?id=…`) redirigen a la nueva, y si el tipo no coincide también. Un id que no existe responde 404 con instrucción de no indexar.
+- `/sitemap.xml` se genera solo: portada, FAQ y cada item disponible. Cada bloque lleva la fecha de su último guardado en el panel, que le sirve a Google para saber qué cambió.
+- `/robots.txt` también es automático.
+- **No se indexan** el carrito, el panel de administración ni las páginas inexistentes.
+
+### Qué pasa cuando editas contenido
+
+No hay que "regenerar" nada. Al pulsar **Guardar**, la siguiente visita (de una persona o de Google) ya recibe la página con lo nuevo.
+
+| Lo que editas | Qué cambia para Google |
+|---|---|
+| Servicios y productos | Ficha, lista de la portada, sitemap y datos estructurados |
+| Portada (título, subtítulo, SEO) | Directo en el HTML de la portada |
+| Secciones (Mensaje, Sobre mí, Testimonios, Contacto…) | Se pintan con JavaScript al cargar; Google las lee, pero más tarde y con menos prioridad que el resto |
+| Preguntas frecuentes | Página `/faq` y datos de preguntas |
+| General (nombre, dirección, redes, logo) | Pie de página, datos del negocio y vista previa |
+
+Dos retrasos normales:
+
+1. **Hasta ~1 minuto** en verse tus cambios desde otros lugares del mundo: el sistema guarda una copia temporal de 60 segundos para cuidar los límites gratuitos. Donde guardas, el cambio se ve de inmediato; una foto nueva puede tardar lo mismo en otros lugares.
+2. **Google decide cuándo vuelve.** El proyecto garantiza que cuando venga encuentre todo actualizado, pero no puede obligarlo a pasar. Para acelerarlo:
+   1. Entra a [Google Search Console](https://search.google.com/search-console) y verifica tu dominio o la dirección `*.workers.dev`.
+   2. En *Sitemaps*, envía `https://<tu-sitio>/sitemap.xml` (una sola vez).
+   3. Tras un cambio importante, usa *Inspección de URLs* → *Solicitar indexación* en esa página.
+
+### Cómo sacarle partido
+
+- Rellena **título y descripción de la portada** (*Mi página → Apariencia y SEO*) con lo que buscaría tu cliente («Psicóloga en Lima», «Clases de guitarra online»), no solo con tu nombre.
+- Pon **nombre y descripción claros** a cada servicio: son el título y el resumen de su ficha.
+- Rellena la **Dirección** si atiendes en un lugar físico.
+- Sube **una foto por servicio o producto**: es la imagen de la vista previa al compartir. Mantenla ligera (unos 300 KB o menos); el panel ya la reduce a JPEG de 1200 px y unos 250 KB, porque WhatsApp no muestra fotos WebP ni muy pesadas.
+- Mantén el **FAQ** con preguntas reales de tus clientes.
+- Con un **dominio propio** el sitio gana en confianza y la copia temporal funciona mejor que en `*.workers.dev`.
+
+### Lo que no hace a propósito
+
+No genera mapa de imágenes ni versiones en varios idiomas (`hreflang`: el sitio usa uno solo), y no modifica `robots.txt`. Tampoco garantiza posiciones en Google: el SEO técnico está cubierto, pero el contenido útil y las visitas dependen de ti.
+
 ## Límites
 
 El panel y la API validan estos topes al guardar; si te pasas, el guardado responde con un mensaje en español que dice cuál.
