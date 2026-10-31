@@ -1,6 +1,6 @@
 # Mi Catálogo Digital
 
-Template para publicar **un catálogo de tus servicios** (y, como extra, productos o mercancías), utilizando la capa gratuita de Cloudflare. Pensado para profesionales independientes, emprendedores y proyectos personales o de hobby.
+Template para publicar **un catálogo de tus servicios** (y, como extra, productos o mercancías), utilizando la capa gratuita de GitHub (guarda tu copia del código) y de Cloudflare (publica el sitio). Pensado para profesionales independientes, emprendedores y proyectos personales o de hobby.
 
 El catálogo se publica **sin costo** en una dirección de Cloudflare del tipo `https://<proyecto>.<subdominio>.workers.dev` (el `<subdominio>` es personalizable, pero si no lo configuras, es uno aleatorio). Si prefieres una dirección propia, como `www.mi-nombre.com`, puedes configurarla después de desplegar: **el dominio se compra aparte y tiene un costo** (normalmente anual, según la extensión y dónde lo compres); lo demás sigue usando la capa gratuita de GitHub y Cloudflare. Detalles en [Publicar tu sitio](#publicar-tu-sitio) y [Usar tu propio dominio](#usar-tu-propio-dominio).
 
@@ -17,7 +17,7 @@ Cada persona hace su propio fork y despliega su propia instancia. No es un SaaS 
 - **Portada editable:** portada, textos, destacados, galería, *Sobre mí* con foto, testimonios, contacto y color de acento propio.
 - **FAQ**, **SEO** (título, descripción, vista previa al compartir, datos estructurados, sitemap) y analítica opcional sin cookies (Cloudflare Web Analytics).
 - **Panel de administración** protegido con contraseña, con límite de intentos y subida de fotos optimizada.
-- Frontend en HTML, CSS y JavaScript puros; todo en la capa gratuita de GitHub y Cloudflare, sin costo salvo el dominio propio si decides usarlo (Workers con archivos estáticos y Workers KV).
+- Frontend en HTML, CSS y JavaScript puros; todo en la capa gratuita de GitHub y Cloudflare (Workers con archivos estáticos y Workers KV); solo el dominio propio, si decides usarlo, tiene costo.
 
 ## SEO: cómo te encuentran en Google y cómo se ve al compartir
 
@@ -166,7 +166,6 @@ Lo habitual en producción es dejar una sola dirección pública. El enlace ofic
 2. Apaga `workers.dev` de una de estas dos formas:
    - En Cloudflare: *Workers & Pages* → tu proyecto → *Settings* → *Domains & Routes* → desactiva la dirección `workers.dev`.
    - En tu repositorio: pon `"workers_dev": false` en `wrangler.jsonc` y haz commit. El workflow de sincronización no sobrescribe `wrangler.jsonc`, así que el cambio se mantiene al traer mejoras del template; sí te avisará de la diferencia.
-
 
 Tenlo en cuenta antes de apagarla:
 
