@@ -15,9 +15,13 @@ async function fechasContenido(env) {
 
 export const onRequestGet = async ({ request, env }) => {
   const origen = new URL(request.url).origin;
-  const [catalogo, fechas] = await Promise.all([getContent(env, 'catalogo', request), fechasContenido(env)]);
+  const [catalogo, config, fechas] = await Promise.all([
+    getContent(env, 'catalogo', request),
+    getContent(env, 'config', request),
+    fechasContenido(env),
+  ]);
 
-  return new Response(xmlSitemap(origen, catalogo, fechas), {
+  return new Response(xmlSitemap(origen, catalogo, fechas, config), {
     headers: { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=3600' },
   });
 };

@@ -129,8 +129,12 @@ test('sitemap: URLs limpias sin ?id= y todas responden', async () => {
     const res = await ctx.get(loc.slice(origen.length));
     assert.ok(res.status === 200 || (res.status === 301 && res.location), `${loc}: respondió ${res.status}`);
   }
-  if (ctx.servicio) assert.ok(locs.includes(`${origen}/servicio/${ctx.servicio.id}`));
-  if (ctx.producto) assert.ok(locs.includes(`${origen}/producto/${ctx.producto.id}`));
+  // El sitemap solo lista el tipo que muestra la portada (tipo_catalogo)
+  const modo = ctx.sitio.config?.perfil?.tipo_catalogo;
+  const veServicios = modo !== 'solo-productos';
+  const veProductos = modo !== 'solo-servicios';
+  if (ctx.servicio) assert.equal(locs.includes(`${origen}/servicio/${ctx.servicio.id}`), veServicios, `servicios en el sitemap con tipo ${modo}`);
+  if (ctx.producto) assert.equal(locs.includes(`${origen}/producto/${ctx.producto.id}`), veProductos, `productos en el sitemap con tipo ${modo}`);
 });
 
 test('items no disponibles: fuera del sitemap pero su ficha responde 200', async t => {

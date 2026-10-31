@@ -213,3 +213,7 @@
 - `npm run dev` + curl contra el KV local: la portada trae título, descripción, canonical, `og:locale` `es_PE`, `h1` y `#catalogo-estatico`; `#secciones-antes` y `#secciones-landing` llegan vacíos (se pintan con JavaScript). Fichas con `Service`/`Product` y `InStock`; 301 en `/producto?id=…` y en tipo cruzado; 404 con `noindex`; carrito con `noindex`; `/admin/*` con `X-Robots-Tag`; `robots.txt` y sitemap correctos.
 - `PUT config` sin cookie de sesión no probado aquí; con sesión: el sitemap gana `<lastmod>`; añadir `perfil.direccion` cambia el JSON-LD a `LocalBusiness` al instante en el mismo lugar (la caché se invalida en el `PUT`; el retraso de ~60 s aplica a otros centros de datos y no se midió). Config restaurada después.
 - `config/config.example.json` pasa de `mixto` a `solo-servicios` (decisión del mantenedor). `npm test`: 44 ok; `npm run test:integracion` local: 34 ok, 0 fallos, 3 omitidas.
+
+## 2026-10-31 — Sitemap respeta `tipo_catalogo` (1.0.1)
+- Motivo: con el ejemplo en `solo-servicios` la portada ocultaba los 5 productos, pero el sitemap los listaba y sus fichas respondían 200 (páginas huérfanas). `xmlSitemap` recibe ahora `config` y filtra con `tiposVisibles`, igual que `htmlCatalogoEstatico`. Las fichas del tipo oculto siguen respondiendo 200 (se pueden compartir) y no llevan `noindex`.
+- `npm test`: 45 ok (nueva prueba por tipo). `npm run test:integracion` local: 34 ok, 0 fallos, 3 omitidas (la prueba del sitemap ahora comprueba presencia o ausencia según el tipo; la del item no disponible pasa antes a `mixto`).

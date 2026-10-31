@@ -55,6 +55,21 @@ test('xmlSitemap omite los items no disponibles', () => {
   assert.doesNotMatch(xml, /\/producto\/b</);
 });
 
+test('xmlSitemap solo lista los items del tipo que muestra el catálogo', () => {
+  const cat = { items: [
+    { id: 'a', tipo: 'servicio' },
+    { id: 'b', tipo: 'producto' },
+  ] };
+  const con = modo => xmlSitemap('https://x.test', cat, {}, { perfil: { tipo_catalogo: modo } });
+  assert.doesNotMatch(con('solo-servicios'), /\/producto\/b</);
+  assert.match(con('solo-servicios'), /\/servicio\/a</);
+  assert.doesNotMatch(con('solo-productos'), /\/servicio\/a</);
+  assert.match(con('solo-productos'), /\/producto\/b</);
+  const mixto = con('mixto');
+  assert.match(mixto, /\/servicio\/a</);
+  assert.match(mixto, /\/producto\/b</);
+});
+
 import { zonasAtendidas } from '../src/_lib/seo.js';
 
 test('zonasAtendidas ignora servicios solo online, productos y solo-productos', () => {

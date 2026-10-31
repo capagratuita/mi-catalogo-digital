@@ -51,7 +51,7 @@ Cada página se arma en el servidor en el momento en que se pide, así que **Goo
 ### Direcciones y mapa del sitio
 
 - Cada ficha tiene una dirección limpia: `/servicio/{id}` para servicios y `/producto/{id}` para productos. Las direcciones antiguas (`/producto?id=…`) redirigen a la nueva, y si el tipo no coincide también. Un id que no existe responde 404 con instrucción de no indexar.
-- `/sitemap.xml` se genera solo: portada, FAQ y cada item disponible. Cada bloque lleva la fecha de su último guardado en el panel, que le sirve a Google para saber qué cambió.
+- `/sitemap.xml` se genera solo: portada, FAQ y cada item disponible del tipo que muestra tu portada (con «Solo servicios» no se listan los productos, y al revés). Cada bloque lleva la fecha de su último guardado en el panel, que le sirve a Google para saber qué cambió.
 - `/robots.txt` también es automático.
 - **No se indexan** el carrito, el panel de administración ni las páginas inexistentes.
 

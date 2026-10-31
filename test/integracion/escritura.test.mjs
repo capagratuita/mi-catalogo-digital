@@ -111,6 +111,10 @@ local('foto subida: og:image y og:image:alt de la ficha; sin foto no hay ninguno
 });
 
 local('item no disponible: fuera del sitemap, ficha 200 con OutOfStock', async () => {
+  // El ejemplo es «solo servicios» y el sitemap ya omite los productos: pasa a mixto para que la prueba sea útil
+  const config = ejemplo('config');
+  config.perfil.tipo_catalogo = 'mixto';
+  assert.equal((await admin.put('config', config)).status, 200);
   const catalogo = ejemplo('catalogo');
   const objetivo = catalogo.items.find(i => i.tipo === 'producto');
   objetivo.disponible = false;

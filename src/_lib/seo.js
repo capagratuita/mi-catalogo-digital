@@ -52,12 +52,15 @@ function masReciente(...fechas) {
 // sitemap.xml. `fechas` trae el updated_at (ISO) de cada key de contenido; las que nunca se
 // han guardado no lo tienen y su URL va sin <lastmod> (mejor omitirlo que inventarlo).
 // Los items comparten la fecha del catálogo: no se guarda una por item.
-export function xmlSitemap(origen, catalogo, fechas = {}) {
+// Solo lista los items del tipo que muestra la portada (`tipo_catalogo`): una ficha que el sitio
+// no enlaza sería una página huérfana. Sin `config` se listan ambos tipos.
+export function xmlSitemap(origen, catalogo, fechas = {}, config = null) {
+  const tipos = tiposVisibles(config);
   const rutas = [
     ['/', masReciente(fechas.config, fechas.catalogo, fechas.landing)],
     ['/faq', masReciente(fechas.config, fechas.faq)],
     // Los no disponibles siguen existiendo (200, OutOfStock) pero no se anuncian en el sitemap
-    ...catalogo.items.filter(item => item.disponible !== false).map(item => [rutaItem(item), masReciente(fechas.config, fechas.catalogo)]),
+    ...catalogo.items.filter(item => item.disponible !== false && tipos.includes(item.tipo)).map(item => [rutaItem(item), masReciente(fechas.config, fechas.catalogo)]),
   ];
   const urls = rutas.map(([ruta, fecha]) =>
     `  <url><loc>${escaparHtml(origen + ruta)}</loc>${fecha ? `<lastmod>${fecha}</lastmod>` : ''}</url>`,
