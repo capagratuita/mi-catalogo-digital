@@ -147,10 +147,26 @@ Las direcciones que ven Google y las apps de mensajería se generan **con el dom
 
 ### Qué tener en cuenta
 
-- **El sitio sigue respondiendo también en `workers.dev`** (`"workers_dev": true` en `wrangler.jsonc`). Ahí el canonical apunta a esa dirección, así que Google podría ver dos copias. Comparte y publica solo el dominio propio, y no enlaces la dirección `workers.dev`.
+- **El sitio sigue respondiendo también en `workers.dev`** (`"workers_dev": true` en `wrangler.jsonc`). Ahí el canonical apunta a esa dirección, así que Google podría ver dos copias. Comparte y publica solo el dominio propio y, cuando funcione bien, apaga `workers.dev` (ver abajo).
 - **La sesión del panel es por dirección:** si entras al panel por tu dominio y por `workers.dev`, tendrás que iniciar sesión en cada una.
 - **Search Console:** verifica el dominio nuevo y envía su `/sitemap.xml` (ver «SEO»). Si ya habías enviado el de `workers.dev`, el nuevo es un sitio distinto para Google.
 - **Cambiar de dirección tiene un costo:** quien tenga guardado el enlace antiguo, o lo haya compartido por WhatsApp, seguirá entrando por `workers.dev`. Conviene conectar el dominio antes de empezar a difundir el sitio.
+
+### Apagar `workers.dev` cuando el dominio ya funciona
+
+Lo habitual en producción es dejar una sola dirección pública. El enlace oficial (canonical) de cada página se genera con el dominio con el que se la visita, así que **no evita el duplicado**: en `workers.dev` se declara a sí misma como la oficial. Apagar esa dirección lo resuelve de raíz.
+
+1. Comprueba que tu dominio abre la portada, una ficha y `/admin` con HTTPS.
+2. Apaga `workers.dev` de una de estas dos formas:
+   - En Cloudflare: *Workers & Pages* → tu proyecto → *Settings* → *Domains & Routes* → desactiva la dirección `workers.dev`.
+   - En tu repositorio: pon `"workers_dev": false` en `wrangler.jsonc` y haz commit. El workflow de sincronización no sobrescribe `wrangler.jsonc`, así que el cambio se mantiene al traer mejoras del template; sí te avisará de la diferencia.
+3. Cambia las direcciones guardadas (WhatsApp, redes, Search Console) a la del dominio.
+
+Tenlo en cuenta antes de apagarla:
+
+- **Déjala encendida al principio.** El botón de despliegue y la guía usan esa dirección, y te sirve de respaldo si algo falla con el dominio.
+- **Si ya la compartiste o Google ya la indexó,** apagarla deja esos enlaces sin respuesta hasta que se actualicen. El proyecto no redirige automáticamente de `workers.dev` al dominio: en ese caso, mantenla encendida unas semanas, publica el dominio nuevo y envía su sitemap en Search Console antes de apagarla.
+- Estos pasos son los de Cloudflare para cualquier Worker; no se han probado en este proyecto y los menús pueden cambiar.
 
 ## Probarlo en tu computador
 
