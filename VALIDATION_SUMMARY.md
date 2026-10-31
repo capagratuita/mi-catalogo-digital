@@ -208,3 +208,8 @@
 
 ## 2026-10-31 — Cambio de nombre a mi-catalogo-digital
 - `package.json`/`package-lock.json`, `wrangler.jsonc`, README, guía, workflow y `AGENTS.md` actualizados; `AGENTS_SUMMARY.md` consolidado en `AGENTS.md` (sección 14). Las entradas anteriores conservan los nombres y URLs con los que se probó entonces.
+
+## 2026-10-31 — Verificación de la sección SEO del README y ejemplo en solo-servicios
+- `npm run dev` + curl contra el KV local: la portada trae título, descripción, canonical, `og:locale` `es_PE`, `h1` y `#catalogo-estatico`; `#secciones-antes` y `#secciones-landing` llegan vacíos (se pintan con JavaScript). Fichas con `Service`/`Product` y `InStock`; 301 en `/producto?id=…` y en tipo cruzado; 404 con `noindex`; carrito con `noindex`; `/admin/*` con `X-Robots-Tag`; `robots.txt` y sitemap correctos.
+- `PUT config` sin cookie de sesión no probado aquí; con sesión: el sitemap gana `<lastmod>`; añadir `perfil.direccion` cambia el JSON-LD a `LocalBusiness` al instante en el mismo lugar (la caché se invalida en el `PUT`; el retraso de ~60 s aplica a otros centros de datos y no se midió). Config restaurada después.
+- `config/config.example.json` pasa de `mixto` a `solo-servicios` (decisión del mantenedor). `npm test`: 44 ok; `npm run test:integracion` local: 34 ok, 0 fallos, 3 omitidas.

@@ -6,7 +6,7 @@
     "whatsapp_usuario": null,
     "email": null,
     "moneda": "USD",
-    "tipo_catalogo": "mixto",
+    "tipo_catalogo": "solo-servicios",
     "reserva_url": null,
     "logo_url": null,
     "direccion": null,

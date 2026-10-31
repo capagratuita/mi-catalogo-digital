@@ -80,7 +80,7 @@ Dos retrasos normales:
 - Rellena la **Dirección** si atiendes en un lugar físico.
 - Sube **una foto por servicio o producto**: es la imagen de la vista previa al compartir. Mantenla ligera (unos 300 KB o menos); el panel ya la reduce a JPEG de 1200 px y unos 250 KB, porque WhatsApp no muestra fotos WebP ni muy pesadas.
 - Mantén el **FAQ** con preguntas reales de tus clientes.
-- Con un **dominio propio** el sitio gana en confianza y la copia temporal funciona mejor que en `*.workers.dev`.
+- Con un **dominio propio** el sitio gana en confianza ante clientes y buscadores.
 
 ### Lo que no hace a propósito
 
