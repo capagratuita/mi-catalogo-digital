@@ -38,7 +38,7 @@ Cada página se arma en el servidor en el momento en que se pide, así que **Goo
 | Título | Portada: *Mi página → Apariencia y SEO*. Fichas y FAQ: «Página - Nombre del negocio» | Si pasa de 60 caracteres se usa solo la parte de la página |
 | Descripción | Portada: *Apariencia y SEO*. Fichas: descripción del item | Se recorta a 155 caracteres, sin partir palabras |
 | Enlace oficial (canonical) | Automático | Evita que Google la tome por un duplicado |
-| Vista previa al compartir (WhatsApp, Facebook, Telegram, X) | Foto del item; si no tiene, tu logo | El idioma se ajusta a tu moneda (PEN→Perú, MXN→México, COP, ARS, CLP, EUR→España; otra→genérico en español) |
+| Vista previa al compartir (WhatsApp, Facebook, Telegram, X) | Foto del item; si no tiene, tu logo | El idioma se ajusta a tu moneda (PEN→Perú, MXN→México, COP, ARS, CLP, VES, GTQ, BOB, CUP, DOP, HNL, EUR→España; USD→español genérico de Latinoamérica) |
 | Datos estructurados (JSON-LD) | Perfil, catálogo y FAQ | Ver abajo |
 
 **Datos estructurados** (información ordenada que Google entiende y puede mostrar en sus resultados):

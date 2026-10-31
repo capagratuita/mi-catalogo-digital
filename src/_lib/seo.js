@@ -112,7 +112,7 @@ export function tituloPagina(parte, negocio) {
   return completo.length <= MAX_TITULO ? completo : recortar(parte, MAX_TITULO);
 }
 
-const LOCALES = { PEN: 'es_PE', MXN: 'es_MX', COP: 'es_CO', ARS: 'es_AR', CLP: 'es_CL', EUR: 'es_ES' };
+const LOCALES = { PEN: 'es_PE', MXN: 'es_MX', COP: 'es_CO', ARS: 'es_AR', CLP: 'es_CL', EUR: 'es_ES', VES: 'es_VE', GTQ: 'es_GT', BOB: 'es_BO', CUP: 'es_CU', DOP: 'es_DO', HNL: 'es_HN' };
 
 // og:locale según la moneda del perfil; con otra (p. ej. USD) se usa español de Latinoamérica
 export function localeOg(moneda) {

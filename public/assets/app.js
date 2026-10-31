@@ -293,7 +293,6 @@ function formatPrecio(precio, moneda) {
   const formato = new Intl.NumberFormat('es', {
     style: 'currency',
     currency: moneda || 'PEN',
-    minimumFractionDigits: 2,
   });
   return formato.format(precio);
 }

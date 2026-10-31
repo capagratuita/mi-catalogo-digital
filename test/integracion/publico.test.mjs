@@ -8,7 +8,7 @@ after(() => ctx.detener());
 
 const { servicio, producto, origen } = ctx;
 const omitir = (t, motivo) => t.skip(motivo);
-const LOCALES = { PEN: 'es_PE', MXN: 'es_MX', COP: 'es_CO', ARS: 'es_AR', CLP: 'es_CL', EUR: 'es_ES' };
+const LOCALES = { PEN: 'es_PE', MXN: 'es_MX', COP: 'es_CO', ARS: 'es_AR', CLP: 'es_CL', EUR: 'es_ES', VES: 'es_VE', GTQ: 'es_GT', BOB: 'es_BO', CUP: 'es_CU', DOP: 'es_DO', HNL: 'es_HN' };
 
 // Items que sirven de muestra en cada prueba de ficha
 const casosFicha = [

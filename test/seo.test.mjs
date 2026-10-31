@@ -108,6 +108,7 @@ import { localeOg } from '../src/_lib/seo.js';
 test('localeOg deriva el idioma de la moneda y cae en es_LA', () => {
   assert.equal(localeOg('PEN'), 'es_PE');
   assert.equal(localeOg('MXN'), 'es_MX');
+  for (const [m, l] of [['VES', 'es_VE'], ['GTQ', 'es_GT'], ['BOB', 'es_BO'], ['CUP', 'es_CU'], ['DOP', 'es_DO'], ['HNL', 'es_HN']]) assert.equal(localeOg(m), l);
   assert.equal(localeOg('USD'), 'es_LA');
   assert.equal(localeOg(undefined), 'es_LA');
 });
