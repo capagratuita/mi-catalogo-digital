@@ -80,7 +80,7 @@ Dos retrasos normales:
 - Rellena la **Dirección** si atiendes en un lugar físico.
 - Sube **una foto por servicio o producto**: es la imagen de la vista previa al compartir. Mantenla ligera (unos 300 KB o menos); el panel ya la reduce a JPEG de 1200 px y unos 250 KB, porque WhatsApp no muestra fotos WebP ni muy pesadas.
 - Mantén el **FAQ** con preguntas reales de tus clientes.
-- Con un **dominio propio** el sitio gana en confianza ante clientes y buscadores.
+- Con un **dominio propio** el sitio gana en confianza ante clientes y buscadores (ver [Usar tu propio dominio](#usar-tu-propio-dominio)).
 
 ### Lo que no hace a propósito
 
@@ -128,6 +128,29 @@ El botón copia el proyecto a tu GitHub, crea los dos almacenes KV y despliega e
 - La configuración debe seguir en `wrangler.jsonc` (con `wrangler.toml` el asistente no enlaza los KV) y sin `id` de KV en el repo del template.
 - Si cambias el nombre del proyecto en el formulario, el asistente actualiza el repo de GitHub, `wrangler.jsonc` y `package.json`.
 - Las URLs de vista previa están desactivadas (`preview_urls = false`): compartirían KV y contraseña con producción.
+
+## Usar tu propio dominio
+
+Por defecto el sitio vive en una dirección `https://<proyecto>.<tu-cuenta>.workers.dev`. Un dominio propio (`www.tunegocio.com`) es más fácil de recordar y transmite más confianza a clientes y buscadores.
+
+### Cómo conectarlo
+
+1. El dominio debe estar en tu cuenta de Cloudflare (comprado ahí o con sus nameservers apuntando a Cloudflare).
+2. Entra al Worker: *Workers & Pages* → tu proyecto → *Settings* → *Domains & Routes* → *Add* → *Custom domain*, y escribe el dominio.
+3. Cloudflare crea el registro DNS y el certificado HTTPS solos; puede tardar unos minutos.
+
+Estos pasos son los de Cloudflare para cualquier Worker; no se han probado en este proyecto y los menús pueden cambiar. No hace falta tocar `wrangler.jsonc` ni el código.
+
+### Qué se adapta solo
+
+Las direcciones que ven Google y las apps de mensajería se generan **con el dominio con el que se visita la página**, no con uno guardado en el proyecto. En cuanto entras por tu dominio, estos elementos ya lo usan: el enlace oficial (canonical), `og:url`, el sitemap, la línea `Sitemap:` de `robots.txt` y las direcciones de las fichas. No hay nada que configurar en el panel.
+
+### Qué tener en cuenta
+
+- **El sitio sigue respondiendo también en `workers.dev`** (`"workers_dev": true` en `wrangler.jsonc`). Ahí el canonical apunta a esa dirección, así que Google podría ver dos copias. Comparte y publica solo el dominio propio, y no enlaces la dirección `workers.dev`.
+- **La sesión del panel es por dirección:** si entras al panel por tu dominio y por `workers.dev`, tendrás que iniciar sesión en cada una.
+- **Search Console:** verifica el dominio nuevo y envía su `/sitemap.xml` (ver «SEO»). Si ya habías enviado el de `workers.dev`, el nuevo es un sitio distinto para Google.
+- **Cambiar de dirección tiene un costo:** quien tenga guardado el enlace antiguo, o lo haya compartido por WhatsApp, seguirá entrando por `workers.dev`. Conviene conectar el dominio antes de empezar a difundir el sitio.
 
 ## Probarlo en tu computador
 
