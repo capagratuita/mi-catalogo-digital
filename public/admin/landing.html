@@ -527,6 +527,14 @@
                         </select>
                         <p class="ayuda" id="estilo-ayuda">Cambia bordes, sombras y títulos en todo el sitio. No cambia los colores.</p>
                     </div>
+                    <div class="form-group">
+                        <label for="landing-tema-vista">Presentación de listados</label>
+                        <select id="landing-tema-vista" name="landing-tema-vista">
+                            <option value="rejilla">Rejilla</option>
+                            <option value="deslizable">Carrusel</option>
+                        </select>
+                        <p class="ayuda">«Carrusel» muestra servicios, productos, destacados y galerías en una sola fila que se desplaza con el dedo o con las flechas.</p>
+                    </div>
 
                     <h3>SEO</h3>
                     <p class="ayuda">Lo que aparece en Google y al compartir el enlace.</p>
@@ -647,6 +655,8 @@
                 fuente: document.getElementById('landing-tema-fuente').value,
                 estilo: document.getElementById('landing-tema-estilo').value
             };
+
+            if (document.getElementById('landing-tema-vista').value === 'deslizable') tema.vista_listas = 'deslizable';
 
             const seo = {
                 titulo: document.getElementById('landing-seo-titulo').value,
@@ -1140,6 +1150,7 @@
             if (landing.tema) {
                 document.getElementById('landing-tema-fuente').value = landing.tema.fuente || 'serif';
                 document.getElementById('landing-tema-estilo').value = landing.tema.estilo || 'moderno';
+                document.getElementById('landing-tema-vista').value = landing.tema.vista_listas === 'deslizable' ? 'deslizable' : 'rejilla';
                 document.getElementById('landing-tema-acento').value = landing.tema.color_acento || ACENTO_POR_DEFECTO;
             }
             avisarContraste();

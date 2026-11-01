@@ -297,6 +297,86 @@ nav .carrito-contador {
   gap: 1.5rem;
 }
 
+/* Listados en carrusel (landing.tema.vista_listas = deslizable) */
+.items-grid.items-deslizable,
+.galeria-grid.items-deslizable {
+  display: flex;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1rem;
+  overscroll-behavior-x: contain;
+  /* sin relleno vertical en táctil: esa franja se sentía como zona libre y el gesto se iba a la página */
+  padding: 0 1rem;
+  margin-inline: -1rem;
+  /* sin barra: en escritorio al arrastrarla provoca saltos; se navega con las flechas, el dedo o el trackpad */
+  scrollbar-width: none;
+}
+
+.items-deslizable::-webkit-scrollbar {
+  display: none;
+}
+
+/* Con ratón la tarjeta sube y proyecta sombra al pasar el cursor: hace falta espacio para no recortarla */
+@media (hover: hover) {
+  .items-grid.items-deslizable,
+  .galeria-grid.items-deslizable {
+    padding-block: 0.5rem 1.5rem;
+  }
+}
+
+.items-deslizable > .item-card {
+  flex: 0 0 min(320px, 82%);
+  scroll-snap-align: start;
+}
+
+.items-deslizable > .galeria-item {
+  flex: 0 0 min(210px, 60%);
+  scroll-snap-align: start;
+}
+
+.items-deslizable:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+
+.deslizable-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.deslizable-nav[hidden] {
+  display: none;
+}
+
+.deslizable-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  background: var(--card);
+  color: var(--ink);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.deslizable-btn:hover:not(:disabled) {
+  background: var(--bg-alt);
+}
+
+.deslizable-btn:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.deslizable-btn:focus-visible {
+  outline: 3px solid var(--accent);
+}
+
 .item-card {
   position: relative;
   background: var(--card-tint);

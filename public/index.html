@@ -243,6 +243,59 @@
 
             grid.innerHTML = '';
             items.forEach(item => grid.appendChild(crearItemCard(item, config, catalogo)));
+            prepararDeslizable(grid);
+        }
+
+        // ¿Los listados se muestran como carrusel? (landing.tema.vista_listas)
+        function vistaDeslizable() {
+            return window.paginaActual?.landing?.tema?.vista_listas === 'deslizable';
+        }
+
+        // Convierte una rejilla en un carrusel: una fila con ajuste a cada elemento y flechas que se
+        // desactivan en los extremos. Si todo cabe en pantalla se queda la rejilla normal.
+        function prepararDeslizable(grid) {
+            // Al cambiar de filtro se vuelve a pintar la misma rejilla: soltar lo de la pasada anterior
+            grid._deslizable?.abort();
+            grid._deslizable = null;
+            grid.parentElement.querySelector(':scope > .deslizable-nav')?.remove();
+            grid.scrollLeft = 0;
+            grid.classList.remove('items-deslizable');
+            grid.removeAttribute('role');
+            grid.removeAttribute('aria-label');
+            if (!vistaDeslizable() || !grid.children.length) return;
+
+            const control = new AbortController();
+            grid._deslizable = control;
+            grid.classList.add('items-deslizable');
+            grid.setAttribute('role', 'region');
+            grid.setAttribute('aria-label', 'Carrusel (desliza para ver más)');
+            grid.tabIndex = 0;
+
+            const nav = crear('div', 'deslizable-nav');
+            const boton = (texto, etiqueta, dir) => {
+                const b = crear('button', 'deslizable-btn', texto);
+                b.type = 'button';
+                b.setAttribute('aria-label', etiqueta);
+                b.addEventListener('click', () => {
+                    const paso = grid.firstElementChild.offsetWidth + (parseFloat(getComputedStyle(grid).columnGap) || 20);
+                    grid.scrollBy({ left: dir * paso, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+                });
+                return b;
+            };
+            const anterior = boton('‹', 'Anterior', -1);
+            const siguiente = boton('›', 'Siguiente', 1);
+            nav.append(anterior, siguiente);
+            grid.after(nav);
+
+            const actualizar = () => {
+                const max = grid.scrollWidth - grid.clientWidth;
+                nav.hidden = max <= 4;
+                anterior.disabled = grid.scrollLeft <= 4;
+                siguiente.disabled = grid.scrollLeft >= max - 4;
+            };
+            grid.addEventListener('scroll', actualizar, { passive: true, signal: control.signal });
+            addEventListener('resize', actualizar, { signal: control.signal });
+            requestAnimationFrame(actualizar);
         }
 
         function renderizarCatalogo() {
@@ -314,6 +367,7 @@
                 const grid = crear('div', 'items-grid');
                 items.forEach(item => grid.appendChild(crearItemCard(item, config, catalogo)));
                 contenedor.append(...parrafos(seccion.contenido), grid);
+                prepararDeslizable(grid);
                 return true;
             },
 
@@ -333,6 +387,7 @@
                     grid.appendChild(enlace);
                 });
                 contenedor.append(...parrafos(seccion.contenido), grid);
+                prepararDeslizable(grid);
                 return true;
             },
 

@@ -468,6 +468,11 @@ export function validateLanding(data, idsCatalogo) {
   if (!['rustico', 'moderno', 'minimalista', 'elegante'].includes(data.tema.estilo)) {
     fail("El campo 'tema.estilo' debe ser 'rustico', 'moderno', 'minimalista' o 'elegante'");
   }
+  // vista_listas es opcional: rejilla o carrusel infinito para servicios, productos, destacados y galerías
+  const vista = data.tema.vista_listas;
+  if (vista !== undefined && vista !== null && !['rejilla', 'deslizable'].includes(vista)) {
+    fail("El campo 'tema.vista_listas' debe ser 'rejilla' o 'deslizable'");
+  }
 
   const vistas = new Set();
   for (const seccion of data.secciones) {

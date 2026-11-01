@@ -79,6 +79,14 @@ test('landing: acento con contraste AA', () => {
   assert.ok(contraste('#b6f23c', '#12161c') > 4.5);
 });
 
+test('landing: vista_listas opcional (rejilla|deslizable)', () => {
+  const con = tema => { const l = copia(landing); l.tema = { ...l.tema, ...tema }; return l; };
+  validateLanding(con({}), ids);
+  validateLanding(con({ vista_listas: 'deslizable' }), ids);
+  validateLanding(con({ vista_listas: 'rejilla' }), ids);
+  rechaza(() => validateLanding(con({ vista_listas: 'carrusel' }), ids), /vista_listas/);
+});
+
 test('landing: secciones, testimonios e items_ids', () => {
   // Las secciones únicas (sobre-mi, contacto, testimonios) sustituyen a la que ya trae el ejemplo
   const con = seccion => { const l = copia(landing); l.secciones = l.secciones.filter(x => x.tipo !== seccion.tipo); l.secciones.push({ titulo: 'X', contenido: '', items_ids: [], ...seccion }); return l; };
