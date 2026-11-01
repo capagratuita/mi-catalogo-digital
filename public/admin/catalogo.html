@@ -581,8 +581,82 @@
             border-bottom-right-radius: 0;
         }
 
-        .item-servicio-detalle .item-incluye {
-            min-height: 150px;
+        .incluye-lista {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .incluye-lista:empty {
+            display: none;
+        }
+
+        .incluye-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            max-width: 100%;
+            padding: 0.2rem 0.2rem 0.2rem 0.75rem;
+            background: var(--bg-alt);
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius-pill);
+            font-size: 0.9rem;
+        }
+
+        .incluye-chip span {
+            overflow-wrap: anywhere;
+        }
+
+        .incluye-chip button {
+            flex: none;
+            width: 28px;
+            height: 28px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--muted);
+            font-size: 1.1rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .incluye-chip button:hover {
+            color: var(--danger);
+        }
+
+        .incluye-chip button:focus-visible {
+            outline: 2px solid var(--ink);
+        }
+
+        .incluye-nuevo {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .incluye-nuevo input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .btn-incluye-agregar {
+            background: white;
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius-btn);
+            min-height: 44px;
+            padding: 0 0.9rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-incluye-agregar:hover:not(:disabled) {
+            background: var(--bg-alt);
+        }
+
+        .btn-incluye-agregar:disabled,
+        .incluye-nuevo input:disabled {
+            color: var(--muted);
+            cursor: not-allowed;
         }
 
         .variante-fila .moneda {
@@ -1046,6 +1120,29 @@
                     </label>`;
         }
 
+        const MAX_INCLUYE = 8;
+
+        function htmlIncluyeChip(texto) {
+            return `<li class="incluye-chip" data-texto="${escapeHtml(texto)}"><span>${escapeHtml(texto)}</span><button type="button" class="btn-incluye-quitar" aria-label="Quitar ${escapeHtml(texto)}">×</button></li>`;
+        }
+
+        function actualizarIncluye(detalle) {
+            const lleno = detalle.querySelectorAll('.incluye-chip').length >= MAX_INCLUYE;
+            const input = detalle.querySelector('.item-incluye-nuevo');
+            input.disabled = lleno;
+            input.placeholder = lleno ? `Máximo ${MAX_INCLUYE} elementos` : 'Ej. Informe final (Enter para añadir)';
+            detalle.querySelector('.btn-incluye-agregar').disabled = lleno;
+        }
+
+        function agregarIncluye(detalle, texto) {
+            const lista = detalle.querySelector('.incluye-lista');
+            if (!texto || lista.children.length >= MAX_INCLUYE) return false;
+            lista.insertAdjacentHTML('beforeend', htmlIncluyeChip(texto));
+            detalle.querySelector('.item-incluye-nuevo').value = '';
+            actualizarIncluye(detalle);
+            return true;
+        }
+
         function htmlVarianteFila(v = {}) {
             const enHoras = v.duracion_minutos >= 60 && v.duracion_minutos % 30 === 0;
             const duracion = v.duracion_minutos == null ? '' : (enHoras ? v.duracion_minutos / 60 : v.duracion_minutos);
@@ -1079,7 +1176,7 @@
         function htmlDetalleServicio(item, visible) {
             const uid = ++detalleUid;
             const modalidad = item.modalidad || '';
-            const incluye = Array.isArray(item.incluye) ? item.incluye.join('\n') : '';
+            const incluye = Array.isArray(item.incluye) ? item.incluye : [];
             const variantes = Array.isArray(item.variantes) ? item.variantes : [];
             const galeria = Array.isArray(item.galeria) ? item.galeria : [];
             const abierto = modalidad || item.zona || incluye || variantes.length || galeria.length ? 'open' : '';
@@ -1102,7 +1199,11 @@
                     <div class="item-fila">
                         <label for="incluye-${uid}">Qué incluye</label>
                         <div>
-                            <textarea id="incluye-${uid}" class="item-incluye" rows="6" placeholder="Una línea por cada cosa que incluye (máx. 8)">${escapeHtml(incluye)}</textarea>
+                            <ul class="incluye-lista" aria-label="Lo que incluye" style="list-style:none;padding:0;margin-bottom:0.5rem">${incluye.map(htmlIncluyeChip).join('')}</ul>
+                            <div class="incluye-nuevo">
+                                <input id="incluye-${uid}" class="item-incluye-nuevo" type="text" maxlength="100" placeholder="Ej. Informe final (Enter para añadir)" ${incluye.length >= MAX_INCLUYE ? 'disabled' : ''}>
+                                <button type="button" class="btn-incluye-agregar" ${incluye.length >= MAX_INCLUYE ? 'disabled' : ''}>+ Añadir</button>
+                            </div>
                         </div>
                     </div>
                     <div class="item-fila">
@@ -1357,7 +1458,9 @@
                 if (item.tipo === 'servicio') {
                     const modalidad = row.querySelector('.item-modalidad').value;
                     const zona = row.querySelector('.item-zona').value.trim();
-                    const incluye = row.querySelector('.item-incluye').value.split('\n').map(l => l.trim()).filter(Boolean);
+                    const pendiente = row.querySelector('.item-incluye-nuevo').value.trim();
+                    if (pendiente) agregarIncluye(row.querySelector('.item-servicio-detalle'), pendiente);
+                    const incluye = [...row.querySelectorAll('.incluye-chip')].map(c => c.dataset.texto);
                     const variantes = leerVariantes(row, item.id);
                     if (modalidad) item.modalidad = modalidad;
                     if (zona) item.zona = zona;
@@ -1964,6 +2067,21 @@
                     moverItem(mover.closest('.item-row'), parseInt(mover.dataset.dir, 10));
                     return;
                 }
+                const incAgregar = event.target.closest('.btn-incluye-agregar');
+                const incQuitar = event.target.closest('.btn-incluye-quitar');
+                if (incAgregar || incQuitar) {
+                    const det = event.target.closest('.item-servicio-detalle');
+                    const campo = det.querySelector('.item-incluye-nuevo');
+                    if (incAgregar) {
+                        agregarIncluye(det, campo.value.trim());
+                        campo.focus();
+                    } else {
+                        incQuitar.closest('.incluye-chip').remove();
+                        actualizarIncluye(det);
+                        campo.focus();
+                    }
+                    return;
+                }
                 const agregar = event.target.closest('.btn-var-agregar');
                 const quitar = event.target.closest('.btn-var-quitar');
                 if (!agregar && !quitar) return;
@@ -1979,6 +2097,12 @@
                     detalle.querySelector('.btn-var-agregar').focus();
                 }
                 actualizarBotonVariantes(detalle);
+            });
+
+            document.getElementById('items-container').addEventListener('keydown', function(event) {
+                if (event.key !== 'Enter' || !event.target.classList.contains('item-incluye-nuevo')) return;
+                event.preventDefault();
+                agregarIncluye(event.target.closest('.item-servicio-detalle'), event.target.value.trim());
             });
 
             document.getElementById('items-container').addEventListener('pointerdown', function(event) {

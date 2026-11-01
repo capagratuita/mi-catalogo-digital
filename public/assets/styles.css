@@ -724,11 +724,34 @@ nav .carrito-contador {
 }
 
 .servicio-incluye {
-  padding-left: 1.25rem;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .servicio-incluye li {
-  margin-bottom: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.servicio-incluye li::before {
+  content: "";
+  width: 0.35rem;
+  height: 0.6rem;
+  margin-top: -0.15rem;
+  border: solid var(--ink);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0.8);
+  flex: none;
 }
 
 .servicio-variantes {
