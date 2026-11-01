@@ -19,6 +19,12 @@
             margin-top: 1rem;
         }
 
+        #resultado-fotos {
+            list-style: none;
+            margin-top: 0.5rem;
+        }
+
+        #resultado-fotos li,
         #resultado-importacion li {
             padding: 0.3rem 0;
         }
@@ -43,8 +49,27 @@
 
             <section class="grupo">
                 <h3>Exportar</h3>
-                <p class="ayuda">Descarga un archivo con tu identidad, catálogo, landing y FAQ. Las fotos no se incluyen: se suben desde cada item en Catálogo.</p>
+                <p class="ayuda">Descarga un archivo con tu identidad, catálogo, landing y FAQ. Las fotos no se incluyen en este archivo: descárgalas aparte abajo.</p>
                 <button type="button" class="btn" id="btn-exportar">Descargar respaldo</button>
+            </section>
+
+            <section class="grupo">
+                <h3>Exportar fotos</h3>
+                <p class="ayuda">Descarga en un .zip las fotos que subiste: las de tus servicios y productos, las galerías, «Sobre mí», el logo y la imagen de fondo. Guárdalo junto con el respaldo; para volver a usarlas, súbelas de nuevo desde cada item.</p>
+                <button type="button" class="btn" id="btn-exportar-fotos">Descargar fotos (.zip)</button>
+                <p class="ayuda" id="progreso-fotos" role="status"></p>
+            </section>
+
+            <section class="grupo">
+                <h3>Importar fotos</h3>
+                <p class="ayuda">Sube de nuevo las fotos de un .zip descargado antes. <strong>Importa primero el respaldo (.json)</strong>: cada foto necesita que su servicio o producto exista en el catálogo. Reemplaza la foto actual de cada item.</p>
+                <div class="form-group">
+                    <label for="archivo-fotos">Archivo de fotos (.zip)</label>
+                    <input type="file" id="archivo-fotos" accept=".zip,application/zip">
+                </div>
+                <button type="button" class="btn" id="btn-importar-fotos">Importar fotos</button>
+                <p class="ayuda" id="progreso-importar-fotos" role="status"></p>
+                <ul id="resultado-fotos" aria-live="polite"></ul>
             </section>
 
             <section class="grupo">
@@ -92,6 +117,70 @@
                 URL.revokeObjectURL(enlace.href);
                 mostrarExito('Respaldo descargado.');
             } catch (error) {
+                mostrarError(error.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function exportarFotos() {
+            const btn = document.getElementById('btn-exportar-fotos');
+            const progreso = document.getElementById('progreso-fotos');
+            btn.disabled = true;
+            progreso.textContent = 'Preparando…';
+            try {
+                const { blob, total } = await window.admin.exportarFotos((hechas, todas) => {
+                    progreso.textContent = `Buscando fotos… ${hechas} de ${todas}`;
+                });
+                const enlace = document.createElement('a');
+                enlace.href = URL.createObjectURL(blob);
+                enlace.download = `fotos-catalogo-${new Date().toISOString().slice(0, 10)}.zip`;
+                document.body.appendChild(enlace);
+                enlace.click();
+                enlace.remove();
+                setTimeout(() => URL.revokeObjectURL(enlace.href), 1000);
+                progreso.textContent = '';
+                mostrarExito(`Se descargaron ${total} ${total === 1 ? 'foto' : 'fotos'}.`);
+            } catch (error) {
+                progreso.textContent = '';
+                mostrarError(error.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function importarFotos() {
+            const lista = document.getElementById('resultado-fotos');
+            const progreso = document.getElementById('progreso-importar-fotos');
+            lista.innerHTML = '';
+            const archivo = document.getElementById('archivo-fotos').files[0];
+            if (!archivo) {
+                mostrarError('Selecciona primero un archivo .zip de fotos.');
+                return;
+            }
+            if (!confirm('Esto reemplazará las fotos actuales de los items que estén en el .zip. ¿Continuar?')) return;
+
+            const btn = document.getElementById('btn-importar-fotos');
+            btn.disabled = true;
+            try {
+                const resultados = await window.admin.importarFotos(archivo, (hechas, todas) => {
+                    progreso.textContent = `Subiendo fotos… ${hechas} de ${todas}`;
+                });
+                progreso.textContent = '';
+                for (const r of resultados.filter(r => !r.ok)) {
+                    const li = document.createElement('li');
+                    li.textContent = `✘ ${r.id}: ${r.error}`;
+                    li.style.color = 'var(--danger)';
+                    lista.appendChild(li);
+                }
+                const bien = resultados.filter(r => r.ok).length;
+                if (bien === resultados.length) {
+                    mostrarExito(`Se importaron ${bien} ${bien === 1 ? 'foto' : 'fotos'}. Pueden tardar hasta un minuto en verse en el sitio.`);
+                } else {
+                    mostrarError(`Se importaron ${bien} de ${resultados.length} fotos. Revisa el detalle.`);
+                }
+            } catch (error) {
+                progreso.textContent = '';
                 mostrarError(error.message);
             } finally {
                 btn.disabled = false;
@@ -146,6 +235,8 @@
                 return;
             }
             document.getElementById('btn-exportar').addEventListener('click', exportar);
+            document.getElementById('btn-exportar-fotos').addEventListener('click', exportarFotos);
+            document.getElementById('btn-importar-fotos').addEventListener('click', importarFotos);
             document.getElementById('btn-importar').addEventListener('click', importar);
         });
     </script>

@@ -247,6 +247,190 @@ function montarSubidaImagen(contenedor, { id, entrada, ladoMax, pesoMax, transpa
   return { refrescar };
 }
 
+// ---- ZIP mínimo (sin compresión) para descargar las fotos sin librerías ----
+const TABLA_CRC = (() => {
+  const tabla = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    tabla[n] = c >>> 0;
+  }
+  return tabla;
+})();
+
+function crc32(datos) {
+  let c = 0xffffffff;
+  for (let i = 0; i < datos.length; i++) c = TABLA_CRC[(c ^ datos[i]) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+
+// archivos: [{ nombre, datos: Uint8Array }] -> Blob .zip (método «store», nombres en UTF-8)
+function crearZip(archivos) {
+  const codificador = new TextEncoder();
+  const ahora = new Date();
+  const hora = (ahora.getHours() << 11) | (ahora.getMinutes() << 5) | (ahora.getSeconds() >> 1);
+  const fecha = ((ahora.getFullYear() - 1980) << 9) | ((ahora.getMonth() + 1) << 5) | ahora.getDate();
+  const partes = [];
+  const central = [];
+  let posicion = 0;
+
+  for (const { nombre, datos } of archivos) {
+    const nombreBytes = codificador.encode(nombre);
+    const crc = crc32(datos);
+
+    const local = new DataView(new ArrayBuffer(30));
+    local.setUint32(0, 0x04034b50, true);
+    local.setUint16(4, 20, true);
+    local.setUint16(6, 0x0800, true);
+    local.setUint16(10, hora, true);
+    local.setUint16(12, fecha, true);
+    local.setUint32(14, crc, true);
+    local.setUint32(18, datos.length, true);
+    local.setUint32(22, datos.length, true);
+    local.setUint16(26, nombreBytes.length, true);
+    partes.push(local, nombreBytes, datos);
+
+    const entrada = new DataView(new ArrayBuffer(46));
+    entrada.setUint32(0, 0x02014b50, true);
+    entrada.setUint16(4, 20, true);
+    entrada.setUint16(6, 20, true);
+    entrada.setUint16(8, 0x0800, true);
+    entrada.setUint16(12, hora, true);
+    entrada.setUint16(14, fecha, true);
+    entrada.setUint32(16, crc, true);
+    entrada.setUint32(20, datos.length, true);
+    entrada.setUint32(24, datos.length, true);
+    entrada.setUint16(28, nombreBytes.length, true);
+    entrada.setUint32(42, posicion, true);
+    central.push(entrada, nombreBytes);
+
+    posicion += 30 + nombreBytes.length + datos.length;
+  }
+
+  const tamCentral = central.reduce((suma, p) => suma + (p.byteLength ?? p.length), 0);
+  const fin = new DataView(new ArrayBuffer(22));
+  fin.setUint32(0, 0x06054b50, true);
+  fin.setUint16(8, archivos.length, true);
+  fin.setUint16(10, archivos.length, true);
+  fin.setUint32(12, tamCentral, true);
+  fin.setUint32(16, posicion, true);
+  return new Blob([...partes, ...central, fin], { type: 'application/zip' });
+}
+
+// Lee un .zip (el nuestro, «store», o uno recomprimido con «deflate») -> [{ nombre, datos: Uint8Array }]
+async function leerZip(buffer) {
+  const bytes = new Uint8Array(buffer);
+  const vista = new DataView(buffer);
+  const decodificador = new TextDecoder();
+
+  let fin = -1;
+  for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 22 - 65535); i--) {
+    if (vista.getUint32(i, true) === 0x06054b50) { fin = i; break; }
+  }
+  if (fin < 0) throw new Error('El archivo no es un .zip válido');
+
+  const total = vista.getUint16(fin + 10, true);
+  let pos = vista.getUint32(fin + 16, true);
+  const entradas = [];
+
+  for (let n = 0; n < total; n++) {
+    if (vista.getUint32(pos, true) !== 0x02014b50) throw new Error('El .zip está dañado');
+    const metodo = vista.getUint16(pos + 10, true);
+    const comprimido = vista.getUint32(pos + 20, true);
+    const largoNombre = vista.getUint16(pos + 28, true);
+    const largoExtra = vista.getUint16(pos + 30, true);
+    const largoComentario = vista.getUint16(pos + 32, true);
+    const desplazamiento = vista.getUint32(pos + 42, true);
+    const nombre = decodificador.decode(bytes.subarray(pos + 46, pos + 46 + largoNombre));
+    pos += 46 + largoNombre + largoExtra + largoComentario;
+    if (nombre.endsWith('/')) continue;
+
+    const inicio = desplazamiento + 30 + vista.getUint16(desplazamiento + 26, true) + vista.getUint16(desplazamiento + 28, true);
+    const crudo = bytes.subarray(inicio, inicio + comprimido);
+    let datos;
+    if (metodo === 0) {
+      datos = crudo;
+    } else if (metodo === 8 && typeof DecompressionStream === 'function') {
+      const flujo = new Blob([crudo]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      datos = new Uint8Array(await new Response(flujo).arrayBuffer());
+    } else {
+      throw new Error('El .zip usa una compresión que este navegador no puede leer. Usa el zip que descargaste de aquí.');
+    }
+    entradas.push({ nombre, datos });
+  }
+  return entradas;
+}
+
+// Sube las fotos de un .zip (como el de exportarFotos) a POST /api/upload, tal cual, sin recomprimirlas.
+// El nombre de cada archivo (sin carpeta ni extensión) es el id de la foto; el item debe existir en el
+// catálogo (importa antes el respaldo .json). Devuelve [{ id, ok, error? }].
+async function importarFotos(archivoZip, alProgreso = () => {}) {
+  const TIPOS = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
+  const entradas = (await leerZip(await archivoZip.arrayBuffer()))
+    .map(({ nombre, datos }) => {
+      const base = nombre.split('/').pop();
+      const m = /^([a-z0-9-]+)\.(jpg|jpeg|png|webp)$/i.exec(base);
+      return m && !nombre.startsWith('__MACOSX/') ? { id: m[1].toLowerCase(), tipo: TIPOS[m[2].toLowerCase()], datos } : null;
+    })
+    .filter(Boolean);
+  if (!entradas.length) throw new Error('El .zip no contiene fotos con el formato esperado (por ejemplo fotos/mi-servicio.jpg).');
+
+  const resultados = [];
+  for (const [i, { id, tipo, datos }] of entradas.entries()) {
+    alProgreso(i + 1, entradas.length);
+    const formulario = new FormData();
+    formulario.append('id', id);
+    formulario.append('file', new File([datos], `${id}`, { type: tipo }));
+    try {
+      const respuesta = await fetch('/api/upload', { method: 'POST', body: formulario });
+      if (respuesta.ok) {
+        resultados.push({ id, ok: true });
+      } else {
+        const error = await respuesta.json().catch(() => ({}));
+        resultados.push({ id, ok: false, error: error.detalle || error.error || `Error ${respuesta.status}` });
+      }
+    } catch {
+      resultados.push({ id, ok: false, error: 'No se pudo conectar' });
+    }
+  }
+  return resultados;
+}
+
+// Descarga todas las fotos subidas (items, galerías de servicios, «Sobre mí», logo y fondo) en un .zip.
+// No hay listado de fotos en el servidor: se piden por los ids del catálogo y las reservadas; las que no
+// existen (404) se omiten. Las fotos de items borrados del catálogo no se incluyen.
+async function exportarFotos(alProgreso = () => {}) {
+  const catalogo = await getContent('catalogo');
+  const ids = ['sobre-mi', 'logo', 'fondo-hero'];
+  for (const item of catalogo.items || []) {
+    ids.push(item.id);
+    for (const foto of item.galeria || []) ids.push(`${item.id}-g${foto.n}`);
+  }
+
+  const EXTENSION = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+  const archivos = [];
+  let hechas = 0;
+  let siguiente = 0;
+  const trabajador = async () => {
+    while (siguiente < ids.length) {
+      const id = ids[siguiente++];
+      try {
+        const respuesta = await fetch(`/api/image?id=${encodeURIComponent(id)}`, { cache: 'no-store' });
+        if (respuesta.ok) {
+          const ext = EXTENSION[(respuesta.headers.get('Content-Type') || '').split(';')[0]] || 'jpg';
+          archivos.push({ nombre: `fotos/${id}.${ext}`, datos: new Uint8Array(await respuesta.arrayBuffer()) });
+        }
+      } catch { /* una foto que falla se omite */ }
+      alProgreso(++hechas, ids.length);
+    }
+  };
+  await Promise.all(Array.from({ length: 4 }, trabajador));
+
+  if (!archivos.length) throw new Error('Todavía no hay fotos subidas.');
+  archivos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+  return { blob: crearZip(archivos), total: archivos.length };
+}
+
 // Respaldo: un solo JSON con las 4 keys. Las escrituras pasan por PUT /api/content.
 async function exportarTodo() {
   const respaldo = { version: 1, exportado: new Date().toISOString() };
@@ -349,6 +533,8 @@ window.admin = {
   subirFoto,
   montarSubidaImagen,
   exportarTodo,
+  exportarFotos,
+  importarFotos,
   importarTodo,
   logout
 };
