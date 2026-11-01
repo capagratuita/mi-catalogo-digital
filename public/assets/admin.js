@@ -104,48 +104,59 @@ async function logout() {
 const FOTO_LADO_MAX = 1200;
 const FOTO_PESO_MAX = 250 * 1024;
 
-function canvasABlob(canvas, calidad) {
-  return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', calidad));
+function canvasABlob(canvas, calidad, tipo = 'image/jpeg') {
+  return new Promise(resolve => canvas.toBlob(resolve, tipo, calidad));
 }
 
 // Reduce la foto a JPEG de hasta 1200 px y ~250 KB. Una imagen ligera y en JPEG se ve rápido en el sitio
 // y es la que WhatsApp acepta en la vista previa de un enlace (con WebP o pesos grandes no la muestra).
 // Si el navegador no puede procesarla, devuelve el archivo original.
-async function optimizarImagen(archivo) {
+// opciones: { ladoMax, pesoMax, transparencia }. Con transparencia (logo) un PNG o WebP sale en PNG
+// para conservar el fondo transparente; si no, siempre JPEG.
+async function optimizarImagen(archivo, { ladoMax = FOTO_LADO_MAX, pesoMax = FOTO_PESO_MAX, transparencia = false } = {}) {
   try {
     const bitmap = await createImageBitmap(archivo);
-    let escala = Math.min(1, FOTO_LADO_MAX / Math.max(bitmap.width, bitmap.height));
+    const conservarPng = transparencia && archivo.type !== 'image/jpeg';
+    let escala = Math.min(1, ladoMax / Math.max(bitmap.width, bitmap.height));
     let blob;
 
-    for (let intento = 0; intento < 4; intento++) {
+    for (let intento = 0; intento < 6; intento++) {
       const canvas = document.createElement('canvas');
       canvas.width = Math.max(1, Math.round(bitmap.width * escala));
       canvas.height = Math.max(1, Math.round(bitmap.height * escala));
 
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#ffffff'; // JPEG no tiene transparencia
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (!conservarPng) {
+        ctx.fillStyle = '#ffffff'; // JPEG no tiene transparencia
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
       ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 
-      for (const calidad of [0.85, 0.78, 0.7, 0.62, 0.55]) {
-        blob = await canvasABlob(canvas, calidad);
-        if (blob && blob.size <= FOTO_PESO_MAX) break;
+      if (conservarPng) {
+        blob = await canvasABlob(canvas, undefined, 'image/png');
+      } else {
+        for (const calidad of [0.85, 0.78, 0.7, 0.62, 0.55]) {
+          blob = await canvasABlob(canvas, calidad);
+          if (blob && blob.size <= pesoMax) break;
+        }
       }
-      if (blob && blob.size <= FOTO_PESO_MAX) break;
+      if (blob && blob.size <= pesoMax) break;
       escala *= 0.85;
     }
 
     bitmap.close();
     if (!blob) return archivo;
-    return new File([blob], 'foto.jpg', { type: 'image/jpeg' });
+    return conservarPng
+      ? new File([blob], 'imagen.png', { type: 'image/png' })
+      : new File([blob], 'foto.jpg', { type: 'image/jpeg' });
   } catch {
     return archivo;
   }
 }
 
 // Optimiza y sube la foto de un item (o del id reservado «sobre-mi») a POST /api/upload.
-async function subirFoto(id, archivo) {
-  const optimizada = await optimizarImagen(archivo);
+async function subirFoto(id, archivo, opciones) {
+  const optimizada = await optimizarImagen(archivo, opciones);
   const datos = new FormData();
   datos.append('id', id);
   datos.append('file', optimizada);
@@ -155,6 +166,85 @@ async function subirFoto(id, archivo) {
     throw new Error(error.detalle || error.error || 'No se pudo subir la foto');
   }
   return respuesta.json();
+}
+
+// Imagen del sitio que se sube desde el admin (fondo del hero, logo): vista previa, «Subir imagen» y «Quitar»
+// junto a un campo de texto con la URL. Al subir, el campo pasa a «/api/image?id=…&v=…» (la `v` evita ver una
+// versión vieja en caché); se guarda con el botón Guardar de la página. Devuelve { refrescar } para
+// repintar la vista previa cuando la página rellena el campo.
+// opciones: { id, entrada, ladoMax, pesoMax, transparencia, minimo: { ancho, alto } }
+function montarSubidaImagen(contenedor, { id, entrada, ladoMax, pesoMax, transparencia = false, minimo }) {
+  contenedor.classList.add('subida-imagen');
+  const vista = document.createElement('img');
+  vista.className = 'subida-imagen-vista';
+  vista.alt = '';
+  vista.hidden = true;
+  const archivo = document.createElement('input');
+  archivo.type = 'file';
+  archivo.accept = 'image/jpeg,image/png,image/webp';
+  archivo.setAttribute('aria-label', 'Elegir una imagen de tu equipo');
+  const subir = document.createElement('button');
+  subir.type = 'button';
+  subir.className = 'btn-mini';
+  subir.textContent = 'Subir imagen';
+  subir.disabled = true;
+  const quitar = document.createElement('button');
+  quitar.type = 'button';
+  quitar.className = 'btn-mini';
+  quitar.textContent = 'Quitar';
+  const estado = document.createElement('p');
+  estado.className = 'ayuda';
+  estado.setAttribute('role', 'status');
+  const fila = document.createElement('div');
+  fila.className = 'subida-imagen-acciones';
+  fila.append(archivo, subir, quitar);
+  contenedor.append(vista, fila, estado);
+
+  function refrescar() {
+    const url = entrada.value.trim();
+    quitar.hidden = !url;
+    if (!url) { vista.hidden = true; return; }
+    vista.onload = () => { vista.hidden = false; };
+    vista.onerror = () => { vista.hidden = true; };
+    vista.src = url;
+  }
+  entrada.addEventListener('change', refrescar);
+  archivo.addEventListener('change', () => { subir.disabled = !archivo.files[0]; });
+  quitar.addEventListener('click', () => {
+    entrada.value = '';
+    entrada.dispatchEvent(new Event('input', { bubbles: true }));
+    estado.textContent = 'Imagen quitada. Pulsa Guardar para aplicar el cambio.';
+    refrescar();
+  });
+  subir.addEventListener('click', async () => {
+    const original = archivo.files[0];
+    if (!original) return;
+    subir.disabled = true;
+    subir.textContent = 'Subiendo…';
+    try {
+      let aviso = '';
+      try {
+        const bitmap = await createImageBitmap(original);
+        if (minimo && (bitmap.width < minimo.ancho || bitmap.height < minimo.alto)) {
+          aviso = ` Ojo: mide ${bitmap.width} × ${bitmap.height} px y lo mínimo recomendado es ${minimo.ancho} × ${minimo.alto} px; podría verse borrosa.`;
+        }
+        bitmap.close();
+      } catch { /* si no se puede leer, el servidor la validará */ }
+      const resultado = await subirFoto(id, original, { ladoMax, pesoMax, transparencia });
+      entrada.value = `${resultado.url}&v=${Date.now()}`;
+      entrada.dispatchEvent(new Event('input', { bubbles: true }));
+      archivo.value = '';
+      estado.textContent = 'Imagen subida. Pulsa Guardar para aplicarla.' + aviso;
+      refrescar();
+    } catch (error) {
+      estado.textContent = error.message || 'No se pudo subir la imagen. Inténtalo de nuevo.';
+      subir.disabled = false;
+    } finally {
+      subir.textContent = 'Subir imagen';
+    }
+  });
+  refrescar();
+  return { refrescar };
 }
 
 // Respaldo: un solo JSON con las 4 keys. Las escrituras pasan por PUT /api/content.
@@ -257,6 +347,7 @@ window.admin = {
   putContent,
   optimizarImagen,
   subirFoto,
+  montarSubidaImagen,
   exportarTodo,
   importarTodo,
   logout

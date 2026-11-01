@@ -21,7 +21,7 @@ export const fichaPublica = ({ tipo } = {}) => paginaPublica({
     const tieneFoto = await existeFoto(env, item.id);
     const imagen = tieneFoto
       ? `${origen}/api/image?id=${encodeURIComponent(item.id)}`
-      : urlImagenValida(perfil.logo_url);
+      : urlImagenValida(perfil.logo_url, origen);
     const esServicio = item.tipo === 'servicio';
     const aConsultar = esServicio && item.precio_a_consultar === true;
 

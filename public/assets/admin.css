@@ -416,3 +416,51 @@ nav .nav-admin {
 .preview-section h3 {
   margin-bottom: 1rem;
 }
+
+/* Subida de imágenes del sitio (fondo del hero, logo) */
+.subida-imagen {
+  margin-top: 0.5rem;
+}
+
+.subida-imagen-vista {
+  display: block;
+  max-width: 100%;
+  max-height: 120px;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-box);
+  background: var(--bg-alt);
+  object-fit: contain;
+}
+
+.subida-imagen-vista[hidden] {
+  display: none;
+}
+
+.subida-imagen-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.subida-imagen-acciones .btn-mini {
+  min-height: 44px;
+  padding: 0 0.9rem;
+  background: var(--bg-alt);
+  border: 0;
+  border-radius: var(--radius-btn);
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.subida-imagen-acciones .btn-mini:hover:not(:disabled) {
+  background: var(--line);
+}
+
+.subida-imagen-acciones .btn-mini:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}

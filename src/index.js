@@ -5,7 +5,7 @@ export const onRequestGet = paginaPublica({
   claves: ['config', 'catalogo', 'landing'],
   meta: ({ config, catalogo, landing }, { origen }) => {
     const perfil = config.perfil;
-    const logo = urlImagenValida(perfil.logo_url);
+    const logo = urlImagenValida(perfil.logo_url, origen);
     const redes = [perfil.redes?.instagram, perfil.redes?.facebook, perfil.redes?.tiktok, perfil.redes?.youtube].filter(Boolean);
 
     const hero = landing.hero || {};
@@ -20,7 +20,7 @@ export const onRequestGet = paginaPublica({
       titulo: landing.seo?.titulo || perfil.nombre,
       descripcion: landing.seo?.descripcion || perfil.descripcion_corta,
       ruta: '/',
-      imagen: logo || urlImagenValida(landing.hero?.imagen_fondo_url),
+      imagen: logo || urlImagenValida(landing.hero?.imagen_fondo_url, origen),
       imagenAlt: logo ? `Logo de ${perfil.nombre}` : perfil.nombre,
       jsonLd: {
         '@context': 'https://schema.org',

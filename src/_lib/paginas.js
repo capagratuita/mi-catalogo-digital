@@ -18,8 +18,10 @@ function jsonParaScript(valor) {
 }
 
 // URLs de imagen aptas para compartir (absolutas y no las r2.dev inválidas)
-export function urlImagenValida(url) {
+export function urlImagenValida(url, origen) {
   if (typeof url !== 'string') return null;
+  // Imagen subida desde el admin («/api/image?id=…»): se vuelve absoluta con el origen del sitio
+  if (url.startsWith('/') && !url.startsWith('//')) return origen ? origen + url : null;
   try {
     const { protocol, hostname } = new URL(url);
     if (protocol !== 'https:' && protocol !== 'http:') return null;

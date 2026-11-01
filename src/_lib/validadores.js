@@ -44,8 +44,9 @@ function validateObject(data, schema, prefix = '') {
   return data;
 }
 
-// Ids que no pueden usarse en el catálogo: se reservan para fotos de la landing (ver /api/upload).
-export const ID_RESERVADOS = ['sobre-mi'];
+// Ids que no pueden usarse en el catálogo: se reservan para imágenes del sitio (foto de «Sobre mí»,
+// fondo del hero y logo; ver /api/upload).
+export const ID_RESERVADOS = ['sobre-mi', 'fondo-hero', 'logo'];
 
 // Las fotos extra de un servicio se guardan con el id «{id}-g{n}» (n de 1 a MAX_GALERIA).
 export const MAX_GALERIA = 6;

@@ -97,7 +97,22 @@ function aplicarMarca(config) {
   if (!perfil) return;
 
   aplicarCarrito(config);
-  document.querySelectorAll('nav .logo').forEach(el => { el.textContent = perfil.nombre; });
+  // Cabecera: logo (si hay) junto al nombre. El logo es decorativo (el nombre ya está al lado)
+  // y se quita solo si no carga.
+  document.querySelectorAll('nav .logo').forEach(el => {
+    el.textContent = '';
+    if (perfil.logo_url) {
+      const img = document.createElement('img');
+      img.className = 'logo-imagen';
+      img.src = perfil.logo_url;
+      img.alt = '';
+      img.addEventListener('error', () => img.remove(), { once: true });
+      el.appendChild(img);
+    }
+    const nombre = document.createElement('span');
+    nombre.textContent = perfil.nombre;
+    el.appendChild(nombre);
+  });
 
   const footerNombre = document.querySelector('footer h3');
   if (footerNombre) footerNombre.textContent = perfil.nombre;

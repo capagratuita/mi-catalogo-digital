@@ -96,8 +96,10 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="perfil-logo_url">URL del logo (opcional)</label>
-                        <input type="url" id="perfil-logo_url" name="perfil-logo_url" placeholder="https://ejemplo.com/logo.png">
+                        <label for="perfil-logo_url">Logo (opcional)</label>
+                        <input type="text" inputmode="url" id="perfil-logo_url" name="perfil-logo_url" placeholder="https://ejemplo.com/logo.png o sube una imagen" aria-describedby="ayuda-logo">
+                        <div id="logo-subida"></div>
+                        <p class="ayuda" id="ayuda-logo">Recomendado: cuadrado de 512 × 512 px (mínimo 200 × 200), PNG o WebP con fondo transparente. Al subirla se reduce a 512 px. Se muestra junto al nombre en la cabecera y en la vista previa al compartir el enlace.</p>
                     </div>
                 </section>
 
@@ -216,6 +218,7 @@
     <script src="../assets/admin.js"></script>
     <script>
         let configActual = null;
+        let subidaLogo = null;
 
         async function cargarConfig() {
             try {
@@ -250,6 +253,7 @@
             document.getElementById('perfil-reserva_url').value = perfil.reserva_url || perfil.calendly_url || '';
             document.getElementById('analitica-cf_token').value = config.analitica?.cf_token || '';
             document.getElementById('perfil-logo_url').value = perfil.logo_url || '';
+            subidaLogo?.refrescar();
             document.getElementById('perfil-redes-instagram').value = perfil.redes?.instagram || '';
             document.getElementById('perfil-redes-facebook').value = perfil.redes?.facebook || '';
             document.getElementById('perfil-redes-tiktok').value = perfil.redes?.tiktok || '';
@@ -285,7 +289,7 @@
                 simbolo_moneda: document.getElementById('perfil-simbolo_moneda').value.trim() || null,
                 tipo_catalogo: document.getElementById('perfil-tipo_catalogo').value,
                 reserva_url: document.getElementById('perfil-reserva_url').value.trim() || null,
-                logo_url: document.getElementById('perfil-logo_url').value || null,
+                logo_url: document.getElementById('perfil-logo_url').value.trim() || null,
                 direccion: leerDireccion(),
                 redes: {
                     instagram: document.getElementById('perfil-redes-instagram').value || null,
@@ -384,6 +388,14 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('form-config');
+            subidaLogo = window.admin.montarSubidaImagen(document.getElementById('logo-subida'), {
+                id: 'logo',
+                entrada: document.getElementById('perfil-logo_url'),
+                ladoMax: 512,
+                pesoMax: 500 * 1024,
+                transparencia: true,
+                minimo: { ancho: 200, alto: 200 }
+            });
             document.getElementById('btn-logout').addEventListener('click', () => window.admin.logout());
             const otraMoneda = document.getElementById('perfil-moneda_personalizada');
             otraMoneda.addEventListener('input', () => {

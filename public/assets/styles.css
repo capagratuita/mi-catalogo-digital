@@ -115,12 +115,24 @@ nav .container {
 }
 
 nav .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
   margin-right: auto;
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--ink);
   text-decoration: none;
+}
+
+nav .logo-imagen {
+  flex: none;
+  height: 32px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
 }
 
 nav .nav-links {

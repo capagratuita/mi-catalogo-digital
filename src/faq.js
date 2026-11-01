@@ -3,7 +3,7 @@ import { tituloPagina } from './_lib/seo.js';
 
 export const onRequestGet = paginaPublica({
   claves: ['config', 'faq', 'landing'],
-  meta: ({ config, faq }) => {
+  meta: ({ config, faq }, { origen }) => {
     const perfil = config.perfil;
     const preguntas = faq.preguntas || [];
 
@@ -11,7 +11,7 @@ export const onRequestGet = paginaPublica({
       titulo: tituloPagina('Preguntas frecuentes', perfil.nombre),
       descripcion: `Respuestas a las preguntas más comunes sobre ${perfil.nombre}.`,
       ruta: '/faq',
-      imagen: urlImagenValida(perfil.logo_url),
+      imagen: urlImagenValida(perfil.logo_url, origen),
       imagenAlt: `Logo de ${perfil.nombre}`,
       jsonLd: preguntas.length && {
         '@context': 'https://schema.org',
