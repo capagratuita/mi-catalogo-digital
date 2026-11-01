@@ -2,11 +2,11 @@
 
 ## 1. Estado actual (verificado 2026-10-30)
 
-**Migrado de Pages a Workers (2026-10-30)** para ofrecer el botón «Deploy to Cloudflare» (README): un Worker con Static Assets (`src/worker.js`, `assets` en `wrangler.jsonc`), KV sin IDs en el repo y `.dev.vars.example` para el secreto. `npm test` (44) y `npm run test:integracion` local (34 ok) pasan con `wrangler dev`. **Botón verificado (2026-10-30):** con `wrangler.jsonc` el asistente crea los dos KV con los nombres que se escriban y los enlaza (con `wrangler.toml` no); los nombres por defecto son iguales y fallan, hay que cambiarlos. **Sin verificar:** las menciones a `personal-ecommerce.pages.dev` en los SUMMARY son históricas.
+**Migrado de Pages a Workers (2026-10-30)** para ofrecer el botón «Deploy to Cloudflare» (README): un Worker con Static Assets (`src/worker.js`, `assets` en `wrangler.jsonc`), KV sin IDs en el repo y `.dev.vars.example` para el secreto. `npm test` (50) y `npm run test:integracion` local (35 ok, 3 omitidas; verificado 2026-11-01) pasan con `wrangler dev`. **Botón verificado (2026-10-30):** con `wrangler.jsonc` el asistente crea los dos KV con los nombres que se escriban y los enlaza (con `wrangler.toml` no); los nombres por defecto son iguales y fallan, hay que cambiarlos. **Sin verificar:** las menciones a `personal-ecommerce.pages.dev` en los SUMMARY son históricas.
 
 El producto está orientado a **servicios de profesionales independientes y emprendedores**; los productos son un extra. El flujo local funciona sin Cloudflare login.
 
-- `npm run dev` arranca en `http://localhost:8788` y en la LAN (`0.0.0.0:8788`). `npm test` ejecuta 44 pruebas de Node (validadores, límite de intentos, acciones del frontend).
+- `npm run dev` arranca en `http://localhost:8788` y en la LAN (`0.0.0.0:8788`). `npm test` ejecuta 50 pruebas de Node (validadores, límite de intentos, acciones del frontend).
 - `wrangler.jsonc` no lleva IDs de KV: el botón «Deploy to Cloudflare» crea los dos namespaces y escribe sus `id` en el repo de cada persona (sección «Despliegue con el botón»).
 - Auth con cookie HMAC-SHA256 (`src/_lib/auth.js`) y límite de 5 fallos / 15 min por IP en `/api/login` (`_lib/intentos.js`). El middleware protege `/admin/*` (salvo login) y `PUT /api/content`/`POST /api/upload`.
 - Los servicios no usan carrito: una sola acción (cotizar, reservar o consultar por WhatsApp). El carrito es solo de productos y se oculta en `solo-servicios` (sección 8).
@@ -198,6 +198,8 @@ Resumen cronológico para no repetir diagnósticos. El detalle técnico vigente 
 
 **Reorganización de documentos (2026-10-31):** `AGENTS_SUMMARY.md` se consolidó en esta sección y se eliminó; tablas de capas y bindings, árbol de carpetas, comandos locales, resumen de la API y notas del botón pasaron a `README.md`.
 
-**Estado de los datos locales:** el KV local tiene un catálogo de panadería de pruebas (no el de ejemplo) y una portada ficticia con los 6 tipos de sección; solo vive en `.wrangler/state`.
+**Versiones 1.1.0–1.7.0 (2026-10-31 / 2026-11-01):** 1.1.0 «Otra moneda»; 1.2.0 «Qué incluye» en cápsulas (admin y ficha); 1.3.0 carrusel opcional (`tema.vista_listas`; se descartó un avance infinito); 1.4.0 moneda siempre como prefijo y `perfil.formato_numero`; 1.5.0 `perfil.simbolo_moneda`, `formatDuracion` y opciones de precio con la duración debajo; 1.5.1 moneda prefijo en el admin y opciones de precio en tarjetas numeradas; 1.6.0 subida de logo y fondo del hero (`logo`, `fondo-hero`), logo en la cabecera; 1.7.0 exportar/importar fotos en .zip. Verificado con navegador real por el mantenedor: logo en la cabecera y su subida. Sin verificar en navegador: resto del carrusel en iOS tras los últimos ajustes, formato de precios, símbolo, subida del fondo y el zip de fotos (probados con Node y curl; ver `VALIDATION_SUMMARY.md`).
+
+**Estado de los datos locales:** el KV local tiene (desde 2026-11-01) el paquete de inicio `mixto` importado a mano con `wrangler kv key put` (antes, un catálogo de panadería de pruebas); solo vive en `.wrangler/state`.
 
 **Pendientes globales:** prueba de la guía con una persona ajena (`docs/friction-log.md`); revisión visual completa en navegador real (`docs/e2e-checklist.md`); `identidad.html` conserva su nombre de archivo (la barra ya dice «General», «Mi página» y «Mi catálogo»); repetir el flujo del botón si Cloudflare cambia el asistente.

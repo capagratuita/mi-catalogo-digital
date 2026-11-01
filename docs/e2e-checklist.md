@@ -22,12 +22,18 @@ Marca cada punto a mano en un sitio recién desplegado (o en `npm run dev`). Pru
 - [ ] Mi página: las pestañas se pueden recorrer con las flechas del teclado, y al salir con cambios sin guardar el navegador avisa.
 - [ ] FAQ: añadir una pregunta y verla en `/faq`.
 - [ ] Respaldo: exportar, borrar una pregunta, importar el respaldo y comprobar que vuelve.
+- [ ] Respaldo → fotos: «Descargar fotos (.zip)» baja un zip con `fotos/{id}.jpg`; borrar una foto de un item, importar el zip (tras el .json) y comprobar que vuelve.
+- [ ] General: subir un logo (PNG con transparencia) y ver que sale junto al nombre en la cabecera de las 4 páginas; «Quitar» y Guardar lo retira. Un logo menor de 200 × 200 avisa.
+- [ ] Mi página → Portada: subir una imagen de fondo (1920 × 1080) y comprobar el texto blanco sobre ella; «Quitar» la retira.
+- [ ] General: «Símbolo en los precios» (`S/.`) y «Formato de los precios» (`1,234.50`) se reflejan en tarjetas, ficha, carrito y mensajes de WhatsApp, con la moneda siempre delante.
+- [ ] Catálogo → servicio: «Qué incluye» se añade con Enter o «+ Añadir» como cápsulas (máx. 8); con 4 opciones de precio cada una es una tarjeta numerada y la moneda va delante del valor.
+- [ ] Mi página → Apariencia y SEO → «Presentación de listados» = Carrusel: servicios, productos, destacados y galería se deslizan con el dedo y con las flechas, quedan alineados a una tarjeta, las flechas se desactivan en los extremos y no hay saltos al cambiar de filtro (probar en iOS).
 
 ## Sitio público
 - [ ] Servicio con precio fijo sin reserva → botón «Consultar por WhatsApp» con mensaje que incluye nombre, precio y duración.
 - [ ] Servicio «Precio a consultar» → «Consultar por WhatsApp» (cotización).
 - [ ] Servicio de categoría con reserva → «Reservar Cita» abre tu agenda.
-- [ ] Servicio con opciones → «Desde X» en la tarjeta; la ficha lista las opciones.
+- [ ] Servicio con opciones → «Desde X» en la tarjeta; la ficha lista las opciones (nombre con la duración debajo, precio a la derecha) y las duraciones se leen «1 h 30 min».
 - [ ] Ninguna tarjeta de servicio tiene «Añadir al Carrito».
 - [ ] Tipo *mixto* (cámbialo en General; el ejemplo viene en *solo servicios*): producto → carrito → «Finalizar Pedido» abre WhatsApp con el resumen.
 - [ ] Modo *solo servicios*: no se ve el icono ni el enlace del carrito; `/carrito` muestra un aviso.

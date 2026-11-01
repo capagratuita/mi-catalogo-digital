@@ -10,13 +10,16 @@ Cada persona hace su propio fork y despliega su propia instancia. No es un SaaS 
 
 ## Qué incluye
 
-- **Servicios:** precio fijo, «Desde X» o «Precio a consultar»; duración, modalidad (online/presencial), zona, qué incluye y opciones de precio (sesión suelta, packs).
+- **Servicios:** precio fijo, «Desde X» o «Precio a consultar»; duración, modalidad (online/presencial), zona, qué incluye (en cápsulas) y opciones de precio (sesión suelta, packs).
 - **Una sola acción por servicio:** «Reservar Cita» (Calendly, Cal.com, Google Calendar…) o «Consultar por WhatsApp». Los servicios no usan carrito.
 - **Productos (extra):** carrito sencillo que consolida pedido y arma una pregunta por WhatsApp. Se oculta si el tipo de catálogo es «Solo servicios» (el valor por defecto).
 - **Tipo de catálogo:** solo servicios, solo productos o mixto.
-- **Portada editable:** portada, textos, destacados, galería, *Sobre mí* con foto, testimonios, contacto y color de acento propio.
+- **Portada editable:** portada con imagen de fondo propia, textos, destacados, galería, *Sobre mí* con foto, testimonios, contacto y color de acento propio.
+- **Presentación:** estilo visual a elegir y, si quieres, servicios, productos, destacados y galerías como **carrusel** en vez de rejilla (*Mi página → Apariencia y SEO*).
+- **Precios a tu manera:** símbolo propio delante del precio (`S/`, `S/.`, `$/.`, `Bs.`…) y formato de miles y decimales a elegir (*General*); las duraciones se leen como «45 min» o «1 h 30 min».
+- **Logo** y **foto de fondo** de la portada: se suben desde el panel (el logo sale junto al nombre en la cabecera).
 - **FAQ**, **SEO** (título, descripción, vista previa al compartir, datos estructurados, sitemap) y analítica opcional sin cookies (Cloudflare Web Analytics).
-- **Panel de administración** protegido con contraseña, con límite de intentos y subida de fotos optimizada.
+- **Panel de administración** protegido con contraseña, con límite de intentos, subida de fotos optimizada y respaldo del contenido y de las fotos.
 - Frontend en HTML, CSS y JavaScript puros; todo en la capa gratuita de GitHub y Cloudflare (Workers con archivos estáticos y Workers KV); solo el dominio propio, si decides usarlo, tiene costo.
 
 ## SEO: cómo te encuentran en Google y cómo se ve al compartir
@@ -65,7 +68,7 @@ No hay que "regenerar" nada. Al pulsar **Guardar**, la siguiente visita (de una 
 | Portada (título, subtítulo, SEO) | Directo en el HTML de la portada |
 | Secciones (Mensaje, Sobre mí, Testimonios, Contacto…) | Se pintan con JavaScript al cargar; Google las lee, pero más tarde y con menos prioridad que el resto |
 | Preguntas frecuentes | Página `/faq` y datos de preguntas |
-| General (nombre, dirección, redes, logo) | Pie de página, datos del negocio y vista previa |
+| General (nombre, dirección, redes, logo) | Cabecera, pie de página, datos del negocio y vista previa |
 
 Dos retrasos normales:
 
@@ -80,6 +83,7 @@ Dos retrasos normales:
 - Rellena **título y descripción de la portada** (*Mi página → Apariencia y SEO*) con lo que buscaría tu cliente («Psicóloga en Lima», «Clases de guitarra online»), no solo con tu nombre.
 - Pon **nombre y descripción claros** a cada servicio: son el título y el resumen de su ficha.
 - Rellena la **Dirección** si atiendes en un lugar físico.
+- Sube tu **logo** (cuadrado, 512 × 512 px, mínimo 200 × 200; PNG o WebP con fondo transparente) y, si quieres, una **imagen de fondo** para la portada (horizontal, 1920 × 1080 px, mínimo 1280 × 720). El panel indica estas medidas junto a cada campo y avisa si la imagen es más pequeña.
 - Sube **una foto por servicio o producto**: es la imagen de la vista previa al compartir. Mantenla ligera (unos 300 KB o menos); el panel ya la reduce a JPEG de 1200 px y unos 250 KB, porque WhatsApp no muestra fotos WebP ni muy pesadas.
 - Mantén el **FAQ** con preguntas reales de tus clientes.
 - Con un **dominio propio** (opcional; el dominio tiene un costo) el sitio gana en confianza ante clientes y buscadores (ver [Usar tu propio dominio](#usar-tu-propio-dominio)).
@@ -107,13 +111,16 @@ El panel y la API validan estos topes al guardar; si te pasas, el guardado respo
 | Dirección | calle 120, ciudad 80, región 80, código postal 20, país de 2 letras |
 | Secciones únicas | *Sobre mí*, *Contacto* y *Testimonios* solo pueden aparecer una vez |
 | Foto subida | JPEG, PNG o WebP de hasta 5 MB; el panel la convierte a JPEG de hasta 1200 px y unos 250 KB |
+| Logo | El panel lo reduce a 512 px (PNG o WebP conservan la transparencia) |
+| Imagen de fondo de la portada | El panel la reduce a JPEG de hasta 1920 px y unos 400 KB |
+| Símbolo de moneda | Hasta 6 caracteres (por ejemplo `S/.`) |
 | Intentos de acceso al panel | 5 fallos en 15 minutos por IP; luego se bloquea |
 
 Los límites de la capa gratuita de Cloudflare también cuentan: el KV de fotos admite 1 GB en total, y Workers KV 1.000 escrituras y 100.000 lecturas al día. Son los valores vigentes al escribir esto (octubre de 2026) y Cloudflare puede cambiarlos en el futuro; consulta los [límites de Workers KV](https://developers.cloudflare.com/kv/platform/limits/) para ver los actuales.
 
 ## Paquetes de inicio
 
-En `config/paquetes/` hay tres paquetes completos listos para importar desde **Admin → Respaldo**: `solo-servicios.json`, `solo-productos.json` y `mixto.json`. Traen texto genérico («Servicio 1», «Producto 1»), FAQ, perfil y todos los tipos de sección de la portada, y los testimonios van marcados «[Ejemplo n]» (no son opiniones reales). No incluyen fotos: se suben desde Catálogo. La [guía de despliegue en capagratuita.com](https://capagratuita.com) explica cómo elegir uno.
+En `config/paquetes/` hay tres paquetes completos listos para importar desde **Admin → Respaldo**: `solo-servicios.json`, `solo-productos.json` y `mixto.json`. Traen texto genérico («Servicio 1», «Producto 1»), FAQ, perfil y todos los tipos de sección de la portada, y los testimonios van marcados «[Ejemplo n]» (no son opiniones reales). No incluyen fotos: se suben desde Catálogo. En **Respaldo** también puedes descargar todas tus fotos en un `.zip` e importarlas de nuevo (importa primero el respaldo `.json`, porque cada foto necesita que su item exista). La [guía de despliegue en capagratuita.com](https://capagratuita.com) explica cómo elegir uno.
 
 ## Publicar tu sitio
 
@@ -270,7 +277,7 @@ Una ruta dinámica nueva se añade en las tablas de `src/worker.js` **y** en `as
 | `PUT /api/content?key=…` | sesión | Valida y guarda; 400 con detalle en español si hay errores. |
 | `POST /api/login` | pública | `{password}`; fija la cookie `admin_session`. 429 tras 5 fallos en 15 min por IP. |
 | `POST /api/logout`, `GET /api/session` | sesión | Cierra / comprueba la sesión. |
-| `POST /api/upload` | sesión | Foto (JPEG/PNG/WebP, ≤5 MB) de un item o de su galería. |
+| `POST /api/upload` | sesión | Foto (JPEG/PNG/WebP, ≤5 MB) de un item o de su galería, o una imagen reservada del sitio (`sobre-mi`, `logo`, `fondo-hero`). |
 | `GET /api/image?id=…` | pública | Sirve la foto desde KV. |
 | `GET /api/defaults?key=…` | pública | Devuelve el ejemplo de esa key (solo lectura). |
 

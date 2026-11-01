@@ -217,3 +217,9 @@
 ## 2026-10-31 — Sitemap respeta `tipo_catalogo` (1.0.1)
 - Motivo: con el ejemplo en `solo-servicios` la portada ocultaba los 5 productos, pero el sitemap los listaba y sus fichas respondían 200 (páginas huérfanas). `xmlSitemap` recibe ahora `config` y filtra con `tiposVisibles`, igual que `htmlCatalogoEstatico`. Las fichas del tipo oculto siguen respondiendo 200 (se pueden compartir) y no llevan `noindex`.
 - `npm test`: 45 ok (nueva prueba por tipo). `npm run test:integracion` local: 34 ok, 0 fallos, 3 omitidas (la prueba del sitemap ahora comprueba presencia o ausencia según el tipo; la del item no disponible pasa antes a `mixto`).
+
+## 2026-11-01 — Versiones 1.1.0 a 1.7.0
+- `npm test`: 50 ok. `npm run test:integracion` local: 35 ok, 0 fallos, 3 omitidas (tras 1.7.0).
+- Verificado por el mantenedor en navegador real: el logo se ve en la cabecera y se sube desde General. El carrusel se afinó con su feedback en escritorio (Vivaldi) y en Safari iOS (saltos, gestos, `scroll-snap`); lo último (`mandatory`, sin relleno vertical en táctil, sin avance infinito) quedó aceptado.
+- Verificado solo con Node/curl, sin navegador: `formatPrecio` (prefijo, `formato_numero`, `simbolo_moneda`) y `formatDuracion`; subida a `/api/upload` de los ids reservados `logo` y `fondo-hero` (200) y de un id inexistente (400); generador y lector de ZIP (`unzip -t` correcto, lectura de zips «store» y «deflate») e importación de un zip contra el servidor local (2 subidas ok y 1 rechazo por item inexistente).
+- No verificado: vista previa de la imagen de fondo y del zip de fotos en un navegador; `og:image` con el logo subido (ruta relativa vuelta absoluta con el origen; no se ejecutó fuera del Worker); `DecompressionStream` en Safari antiguo.
