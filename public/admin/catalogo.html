@@ -347,6 +347,18 @@
             font-size: 0.8rem;
         }
 
+        /* Moneda como prefijo del precio (como en el sitio público) */
+        .precio-prefijo .moneda {
+            border: 1px solid var(--line);
+            border-right: 0;
+            border-radius: var(--radius-btn) 0 0 var(--radius-btn);
+        }
+
+        .item-row-edit .precio-wrap.precio-prefijo input,
+        .variante-fila .precio-wrap.precio-prefijo input {
+            border-radius: 0 var(--radius-btn) var(--radius-btn) 0;
+        }
+
         /* Los campos que no aplican al tipo del item se ocultan (y mantienen su valor) */
         .item-row-edit [hidden] {
             display: none !important;
@@ -556,12 +568,30 @@
             color: var(--muted);
         }
 
+        /* Cada opción es una tarjeta con su número, para distinguirlas cuando hay varias */
+        .variantes-lista {
+            counter-reset: opcion;
+        }
+
         .variante-fila {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(100px, 140px) minmax(100px, 150px) 44px;
             gap: 0.5rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding: 0.6rem 0.75rem 0.75rem;
+            background: var(--bg-alt);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-box);
             align-items: center;
+        }
+
+        .variante-fila::before {
+            counter-increment: opcion;
+            content: "Opción " counter(opcion);
+            grid-column: 1 / -1;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
         }
 
         .variante-fila input {
@@ -1149,9 +1179,9 @@
             return `
                 <div class="variante-fila">
                     <input class="var-nombre" type="text" maxlength="60" placeholder="Nombre (ej. Sesión suelta)" aria-label="Nombre de la opción" value="${escapeHtml(v.nombre)}">
-                    <span class="precio-wrap var-precio-wrap">
-                        <input class="var-precio" type="number" min="0" step="0.01" placeholder="Precio" aria-label="Precio de la opción" value="${v.precio ?? ''}">
+                    <span class="precio-wrap precio-prefijo var-precio-wrap">
                         <span class="moneda" aria-label="Moneda">${escapeHtml(monedaActual)}</span>
+                        <input class="var-precio" type="number" min="0" step="0.01" placeholder="Precio" aria-label="Precio de la opción" value="${v.precio ?? ''}">
                     </span>
                     <span class="precio-wrap var-precio-wrap">
                         <input class="var-minutos" type="number" min="0" step="any" placeholder="Duración" aria-label="Duración de la opción (opcional)" value="${duracion}">
@@ -1510,9 +1540,9 @@
                         <input class="item-nombre" type="text" placeholder="Nombre del producto o servicio" required>
                     </label>
                     <label class="campo"><span>Precio</span>
-                        <span class="precio-wrap">
-                            <input class="item-precio" type="number" placeholder="Precio" step="0.01" required>
+                        <span class="precio-wrap precio-prefijo">
                             <span class="moneda" aria-label="Moneda">${escapeHtml(monedaActual)}</span>
+                            <input class="item-precio" type="number" placeholder="Precio" step="0.01" required>
                         </span>
                     </label>
                 </div>
@@ -1810,7 +1840,7 @@
         async function cargarCatalogo() {
             try {
                 const config = await window.admin.getContent('config').catch(() => null);
-                monedaActual = (config && config.perfil && config.perfil.moneda) || '';
+                monedaActual = (config && config.perfil && (config.perfil.simbolo_moneda || config.perfil.moneda)) || '';
                 const catalogo = await window.admin.getContent('catalogo');
                 catalogoActual = catalogo;
                 idsGuardados = new Set((catalogo.items || []).map(i => i.id));
@@ -1882,9 +1912,9 @@
                         <input class="item-nombre" type="text" placeholder="Nombre del producto o servicio" value="${escapeHtml(item.nombre)}" required>
                     </label>
                     <label class="campo"><span>Precio</span>
-                        <span class="precio-wrap">
-                            <input class="item-precio" type="number" placeholder="Precio" step="0.01" value="${item.precio || 0}" required>
+                        <span class="precio-wrap precio-prefijo">
                             <span class="moneda" aria-label="Moneda">${escapeHtml(monedaActual)}</span>
+                            <input class="item-precio" type="number" placeholder="Precio" step="0.01" value="${item.precio || 0}" required>
                         </span>
                     </label>
                 </div>
