@@ -72,6 +72,17 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="perfil-formato_numero">Formato de los precios</label>
+                            <select id="perfil-formato_numero" name="perfil-formato_numero" aria-describedby="ayuda-formato-numero">
+                                <option value="">Automático (1234,50)</option>
+                                <option value="coma-punto">1,234.50 (coma en miles, punto en decimales)</option>
+                                <option value="punto-coma">1.234,50 (punto en miles, coma en decimales)</option>
+                                <option value="espacio-coma">1 234,50 (espacio en miles, coma en decimales)</option>
+                            </select>
+                            <p class="ayuda" id="ayuda-formato-numero">Cómo se escriben los precios en tu sitio. La moneda siempre va delante.</p>
+                        </div>
+
+                        <div class="form-group">
                             <label for="perfil-moneda_personalizada">Otra moneda (opcional)</label>
                             <input type="text" id="perfil-moneda_personalizada" name="perfil-moneda_personalizada" maxlength="3" pattern="[A-Za-z]{3}" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="UYU" aria-describedby="ayuda-moneda-personalizada">
                             <p class="ayuda" id="ayuda-moneda-personalizada">Si tu moneda no está en la lista, escribe su código de 3 letras (por ejemplo UYU). Reemplaza a la moneda de la lista.</p>
@@ -224,6 +235,7 @@
             const selectorMoneda = document.getElementById('perfil-moneda');
             const personalizada = String(perfil.moneda_personalizada || '').toUpperCase();
             document.getElementById('perfil-moneda_personalizada').value = personalizada;
+            document.getElementById('perfil-formato_numero').value = perfil.formato_numero || '';
             const codigoSelector = personalizada ? '' : (perfil.moneda || 'PEN');
             const existe = Array.from(selectorMoneda.options).some(o => o.value === codigoSelector);
             selectorMoneda.value = existe ? codigoSelector : (Array.from(selectorMoneda.options).some(o => o.value === 'PEN') ? 'PEN' : selectorMoneda.options[0].value);
@@ -262,6 +274,7 @@
                 email: document.getElementById('perfil-email').value.trim() || null,
                 moneda: monedaPersonalizada || document.getElementById('perfil-moneda').value,
                 moneda_personalizada: monedaPersonalizada || null,
+                formato_numero: document.getElementById('perfil-formato_numero').value || null,
                 tipo_catalogo: document.getElementById('perfil-tipo_catalogo').value,
                 reserva_url: document.getElementById('perfil-reserva_url').value.trim() || null,
                 logo_url: document.getElementById('perfil-logo_url').value || null,

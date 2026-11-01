@@ -170,6 +170,12 @@ export function validateConfig(data) {
   if (personalizada && !/^[A-Z]{3}$/.test(personalizada)) {
     fail("El campo 'perfil.moneda_personalizada' debe ser un código de 3 letras mayúsculas, por ejemplo UYU");
   }
+  // formato_numero es opcional: separadores de miles y decimales; sin valor se usa el del idioma
+  const formatoNumero = data.perfil.formato_numero;
+  if (formatoNumero !== undefined && formatoNumero !== null
+      && !['coma-punto', 'punto-coma', 'espacio-coma'].includes(formatoNumero)) {
+    fail("El campo 'perfil.formato_numero' debe ser 'coma-punto', 'punto-coma' o 'espacio-coma'");
+  }
   if (data.perfil.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.perfil.email)) {
     fail("El campo 'perfil.email' debe ser un correo válido, por ejemplo nombre@dominio.com");
   }

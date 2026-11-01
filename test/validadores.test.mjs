@@ -125,6 +125,12 @@ test('config: moneda_personalizada', () => {
   }
 });
 
+test('config: formato_numero opcional', () => {
+  const con = valor => { const c = copia(config); c.perfil.formato_numero = valor; return c; };
+  for (const bueno of [undefined, null, 'coma-punto', 'punto-coma', 'espacio-coma']) validateConfig(con(bueno));
+  rechaza(() => validateConfig(con('otro')), /formato_numero/);
+});
+
 test('normalizarConfig: moneda_personalizada válida pasa a ser perfil.moneda', () => {
   const c = copia(config); c.perfil.moneda = 'PEN'; c.perfil.moneda_personalizada = 'UYU';
   assert.equal(normalizarConfig(c).perfil.moneda, 'UYU');

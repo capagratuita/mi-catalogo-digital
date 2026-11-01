@@ -1,6 +1,6 @@
 {
   "name": "mi-catalogo-digital",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Template desplegable para publicar un catálogo personal de servicios (y productos) con Cloudflare Workers y Workers KV",
   "main": "src/worker.js",
   "scripts": {

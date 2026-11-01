@@ -32,7 +32,10 @@ function datosEmbebidos() {
 function loadContent(key) {
   if (!contenido[key]) {
     const embebido = datosEmbebidos()[key];
-    contenido[key] = (embebido !== undefined ? Promise.resolve(embebido) : fetchContent(key)).catch(error => {
+    contenido[key] = (embebido !== undefined ? Promise.resolve(embebido) : fetchContent(key)).then(datos => {
+      if (key === 'config') formatoNumero = datos?.perfil?.formato_numero || null;
+      return datos;
+    }).catch(error => {
       delete contenido[key];
       throw error;
     });
@@ -289,12 +292,23 @@ function aplicarCarrito(config) {
   });
 }
 
+// Formato de los números (config.perfil.formato_numero); sin valor se usa el del idioma (es).
+// Se fija al cargar la configuración (loadContent) y lo lee formatPrecio.
+let formatoNumero = null;
+const LOCALE_NUMERO = { 'coma-punto': 'en-US', 'punto-coma': 'de-DE', 'espacio-coma': 'fr-FR' };
+
 function formatPrecio(precio, moneda) {
-  const formato = new Intl.NumberFormat('es', {
-    style: 'currency',
-    currency: moneda || 'PEN',
-  });
-  return formato.format(precio);
+  const codigo = moneda || 'PEN';
+  const opciones = { style: 'currency', currency: codigo };
+  // La moneda siempre va delante («US$10,00», «PEN 10,00»); Intl en español la pone detrás.
+  const simbolo = new Intl.NumberFormat('es', opciones).formatToParts(precio)
+    .filter(p => p.type === 'currency').map(p => p.value).join('');
+  const numero = new Intl.NumberFormat(LOCALE_NUMERO[formatoNumero] || 'es', opciones).formatToParts(precio)
+    .filter(p => p.type !== 'currency' && p.type !== 'literal' && p.type !== 'minusSign')
+    .map(p => p.value).join('')
+    .replace(/\u202f/g, '\u00a0');
+  const sep = /[\p{L}]$/u.test(simbolo) ? '\u00a0' : '';
+  return `${simbolo}${sep}${numero}`;
 }
 
 function getCarrito() {
