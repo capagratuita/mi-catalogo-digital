@@ -79,6 +79,23 @@ local('dirección con ciudad: la portada pasa a LocalBusiness con PostalAddress'
   });
 });
 
+local('moneda personalizada: se guarda y perfil.moneda queda igual', async () => {
+  const config = ejemplo('config');
+  config.perfil.moneda = 'UYU';
+  config.perfil.moneda_personalizada = 'UYU';
+  const put = await admin.put('config', config);
+  assert.equal(put.status, 200, put.texto);
+  const guardado = (await ctx.get('/api/content?key=config')).json();
+  assert.equal(guardado.perfil.moneda, 'UYU');
+  assert.equal(guardado.perfil.moneda_personalizada, 'UYU');
+  const og = (await ctx.get('/')).texto;
+  assert.match(og, /og:locale" content="es_LA"/);
+  config.perfil.moneda_personalizada = 'uy';
+  const malo = await admin.put('config', config);
+  assert.equal(malo.status, 400);
+  assert.match(malo.json().detalle || malo.json().error, /moneda_personalizada/);
+});
+
 local('sitemap: tras guardar config, la portada ya lleva lastmod', async () => {
   const mapa = lastmods((await ctx.get('/sitemap.xml')).texto);
   assert.match(mapa['/'] || '', /^\d{4}-\d{2}-\d{2}T/);

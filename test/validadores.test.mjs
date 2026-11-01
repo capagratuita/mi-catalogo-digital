@@ -107,6 +107,25 @@ test('faq: límites', () => {
   rechaza(() => validateFAQ({ preguntas: [{ p: '', r: 'r' }] }), /'p'/);
 });
 
+test('config: moneda_personalizada', () => {
+  const con = valor => { const c = copia(config); c.perfil.moneda_personalizada = valor; return c; };
+  validateConfig(con(''));
+  validateConfig(con(null));
+  validateConfig(con('UYU'));
+  for (const malo of ['uy', 'UYUU', 'U1Y']) {
+    rechaza(() => validateConfig(con(malo)), /moneda_personalizada/);
+  }
+});
+
+test('normalizarConfig: moneda_personalizada válida pasa a ser perfil.moneda', () => {
+  const c = copia(config); c.perfil.moneda = 'PEN'; c.perfil.moneda_personalizada = 'UYU';
+  assert.equal(normalizarConfig(c).perfil.moneda, 'UYU');
+  c.perfil.moneda_personalizada = 'uy';
+  assert.equal(normalizarConfig(c).perfil.moneda, 'PEN');
+  c.perfil.moneda_personalizada = null;
+  assert.equal(normalizarConfig(c).perfil.moneda, 'PEN');
+});
+
 test('config: WhatsApp por número, por usuario o ambos', () => {
   const con = cambios => { const c = copia(config); Object.assign(c.perfil, cambios); return c; };
   validateConfig(con({ whatsapp: '', whatsapp_usuario: 'revelix360' }));

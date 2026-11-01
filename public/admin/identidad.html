@@ -70,6 +70,12 @@
                                 <option value="VES">VES - Bolívar Venezolano</option>
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label for="perfil-moneda_personalizada">Otra moneda (opcional)</label>
+                            <input type="text" id="perfil-moneda_personalizada" name="perfil-moneda_personalizada" maxlength="3" pattern="[A-Za-z]{3}" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="UYU" aria-describedby="ayuda-moneda-personalizada">
+                            <p class="ayuda" id="ayuda-moneda-personalizada">Si tu moneda no está en la lista, escribe su código de 3 letras (por ejemplo UYU). Reemplaza a la moneda de la lista.</p>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -215,7 +221,12 @@
             document.getElementById('perfil-whatsapp').value = perfil.whatsapp || '';
             document.getElementById('perfil-whatsapp_usuario').value = perfil.whatsapp_usuario || '';
             document.getElementById('perfil-email').value = perfil.email || '';
-            document.getElementById('perfil-moneda').value = perfil.moneda || 'PEN';
+            const selectorMoneda = document.getElementById('perfil-moneda');
+            const personalizada = String(perfil.moneda_personalizada || '').toUpperCase();
+            document.getElementById('perfil-moneda_personalizada').value = personalizada;
+            const codigoSelector = personalizada ? '' : (perfil.moneda || 'PEN');
+            const existe = Array.from(selectorMoneda.options).some(o => o.value === codigoSelector);
+            selectorMoneda.value = existe ? codigoSelector : (Array.from(selectorMoneda.options).some(o => o.value === 'PEN') ? 'PEN' : selectorMoneda.options[0].value);
             document.getElementById('perfil-tipo_catalogo').value = perfil.tipo_catalogo || 'solo-servicios';
             document.getElementById('perfil-reserva_url').value = perfil.reserva_url || perfil.calendly_url || '';
             document.getElementById('analitica-cf_token').value = config.analitica?.cf_token || '';
@@ -242,13 +253,15 @@
         }
 
         function obtenerFormulario() {
+            const monedaPersonalizada = document.getElementById('perfil-moneda_personalizada').value.trim().toUpperCase();
             const perfil = {
                 nombre: document.getElementById('perfil-nombre').value,
                 descripcion_corta: document.getElementById('perfil-descripcion_corta').value,
                 whatsapp: document.getElementById('perfil-whatsapp').value.trim(),
                 whatsapp_usuario: document.getElementById('perfil-whatsapp_usuario').value.trim().replace(/^@/, '') || null,
                 email: document.getElementById('perfil-email').value.trim() || null,
-                moneda: document.getElementById('perfil-moneda').value,
+                moneda: monedaPersonalizada || document.getElementById('perfil-moneda').value,
+                moneda_personalizada: monedaPersonalizada || null,
                 tipo_catalogo: document.getElementById('perfil-tipo_catalogo').value,
                 reserva_url: document.getElementById('perfil-reserva_url').value.trim() || null,
                 logo_url: document.getElementById('perfil-logo_url').value || null,
@@ -351,6 +364,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('form-config');
             document.getElementById('btn-logout').addEventListener('click', () => window.admin.logout());
+            const otraMoneda = document.getElementById('perfil-moneda_personalizada');
+            otraMoneda.addEventListener('input', () => {
+                otraMoneda.value = otraMoneda.value.replace(/[^A-Za-z]/g, '').toUpperCase();
+            });
             form.addEventListener('submit', guardarConfig);
             form.addEventListener('input', marcarModificado);
             form.addEventListener('change', marcarModificado);

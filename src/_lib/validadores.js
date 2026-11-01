@@ -90,11 +90,22 @@ export const TOKEN_ANALITICA = /^[A-Za-z0-9]{16,64}$/;
 // Datos guardados antes del cambio de nombres: `negocio` pasó a `perfil` y
 // `modo_negocio` a `tipo_catalogo`. Se traducen al leer y al guardar, sin mutar el original.
 export function normalizarConfig(data) {
-  if (!isPlainObject(data) || !isPlainObject(data.negocio)) return data;
-  const { negocio, ...resto } = data;
-  const { modo_negocio, ...perfil } = { ...negocio, ...(isPlainObject(data.perfil) ? data.perfil : {}) };
-  if (modo_negocio !== undefined && perfil.tipo_catalogo === undefined) perfil.tipo_catalogo = modo_negocio;
-  return { ...resto, perfil };
+  if (!isPlainObject(data)) return data;
+  let resultado = data;
+  if (isPlainObject(data.negocio)) {
+    const { negocio, ...resto } = data;
+    const { modo_negocio, ...perfil } = { ...negocio, ...(isPlainObject(data.perfil) ? data.perfil : {}) };
+    if (modo_negocio !== undefined && perfil.tipo_catalogo === undefined) perfil.tipo_catalogo = modo_negocio;
+    resultado = { ...resto, perfil };
+  }
+  // «Otra moneda»: si trae un código válido, es la moneda efectiva (perfil.moneda) en todo el sitio,
+  // aunque el dato venga de un respaldo o de una escritura directa donde ambos campos no coincidan.
+  const personalizada = resultado.perfil?.moneda_personalizada;
+  if (isPlainObject(resultado.perfil) && typeof personalizada === 'string' && /^[A-Z]{3}$/.test(personalizada)
+      && resultado.perfil.moneda !== personalizada) {
+    resultado = { ...resultado, perfil: { ...resultado.perfil, moneda: personalizada } };
+  }
+  return resultado;
 }
 
 // Dirección postal opcional (datos estructurados de negocio local). Todos los campos son texto;
@@ -153,6 +164,11 @@ export function validateConfig(data) {
   }
   if (!/^[A-Z]{3}$/.test(data.perfil.moneda)) {
     fail("El campo 'perfil.moneda' debe ser un código ISO 4217 de 3 letras");
+  }
+  const personalizada = data.perfil.moneda_personalizada;
+  if (personalizada !== undefined) validateType(personalizada, ['string', 'null'], 'perfil.moneda_personalizada');
+  if (personalizada && !/^[A-Z]{3}$/.test(personalizada)) {
+    fail("El campo 'perfil.moneda_personalizada' debe ser un código de 3 letras mayúsculas, por ejemplo UYU");
   }
   if (data.perfil.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.perfil.email)) {
     fail("El campo 'perfil.email' debe ser un correo válido, por ejemplo nombre@dominio.com");
