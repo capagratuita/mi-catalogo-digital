@@ -510,7 +510,7 @@
 
             let durationHtml = '';
             if (isService) {
-                durationHtml = `<span class="servicio-info">${item.duracion_minutos} min</span>`;
+                durationHtml = `<span class="servicio-info">${window.app.formatDuracion(item.duracion_minutos)}</span>`;
             }
 
             const accionHtml = accion ? window.app.htmlAccion(accion, item.id) : '';

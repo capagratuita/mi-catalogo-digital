@@ -158,7 +158,7 @@
             const duracionSpan = document.getElementById('producto-duracion');
             if (producto.tipo === 'servicio' && producto.duracion_minutos > 0) {
                 servicioInfo.style.display = 'flex';
-                duracionSpan.textContent = `${producto.duracion_minutos} minutos`;
+                duracionSpan.textContent = window.app.formatDuracion(producto.duracion_minutos);
             } else {
                 servicioInfo.style.display = 'none';
             }
@@ -223,9 +223,12 @@
                 const lista = crearElemento('ul', 'servicio-variantes');
                 variantes.forEach(v => {
                     const li = crearElemento('li');
-                    li.appendChild(crearElemento('span', 'variante-nombre', v.nombre));
-                    const duracion = v.duracion_minutos > 0 ? ` · ${v.duracion_minutos} min` : '';
-                    li.appendChild(crearElemento('span', 'variante-precio', window.app.formatPrecio(v.precio, config.perfil.moneda) + duracion));
+                    // Nombre con la duración debajo en gris; el precio solo, alineado a la derecha
+                    const texto = crearElemento('span', 'variante-texto');
+                    texto.appendChild(crearElemento('span', 'variante-nombre', v.nombre));
+                    if (v.duracion_minutos > 0) texto.appendChild(crearElemento('span', 'variante-duracion', window.app.formatDuracion(v.duracion_minutos)));
+                    li.appendChild(texto);
+                    li.appendChild(crearElemento('span', 'variante-precio', window.app.formatPrecio(v.precio, config.perfil.moneda)));
                     lista.appendChild(li);
                 });
                 contenedor.appendChild(lista);

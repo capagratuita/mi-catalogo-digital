@@ -841,9 +841,26 @@ nav .carrito-contador {
 .servicio-variantes li {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 1rem;
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--line);
+}
+
+.variante-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.variante-nombre {
+  overflow-wrap: anywhere;
+}
+
+.variante-duracion {
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .variante-precio {

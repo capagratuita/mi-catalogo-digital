@@ -33,7 +33,10 @@ function loadContent(key) {
   if (!contenido[key]) {
     const embebido = datosEmbebidos()[key];
     contenido[key] = (embebido !== undefined ? Promise.resolve(embebido) : fetchContent(key)).then(datos => {
-      if (key === 'config') formatoNumero = datos?.perfil?.formato_numero || null;
+      if (key === 'config') {
+        formatoNumero = datos?.perfil?.formato_numero || null;
+        simboloMoneda = datos?.perfil?.simbolo_moneda || null;
+      }
       return datos;
     }).catch(error => {
       delete contenido[key];
@@ -151,7 +154,7 @@ function renderItem(item, config, catalogo) {
   const esServicio = item.tipo === 'servicio';
   const precioHtml = `<span class="precio">${textoPrecio(item, config.perfil.moneda)}</span>`;
   const duracionHtml = esServicio
-    ? `<div class="servicio-info">Duración: ${item.duracion_minutos} minutos</div>`
+    ? `<div class="servicio-info">Duración: ${formatDuracion(item.duracion_minutos)}</div>`
     : '';
   const accionHtml = accion ? htmlAccion(accion, item.id) : '';
 
@@ -228,7 +231,7 @@ function textoPrecio(item, moneda) {
 
 function buildCotizacionLink(config, item) {
   let mensaje = `Hola, quisiera cotizar el servicio "${item.nombre}"`;
-  if (item.duracion_minutos > 0) mensaje += ` (duración estimada: ${item.duracion_minutos} min)`;
+  if (item.duracion_minutos > 0) mensaje += ` (duración estimada: ${formatDuracion(item.duracion_minutos)})`;
   mensaje += '. ¿Me confirmas el precio y la disponibilidad?';
   return buildWhatsAppLink(config, mensaje);
 }
@@ -238,7 +241,7 @@ function buildConsultaLink(config, item) {
   if (requiereCotizacion(item)) return buildCotizacionLink(config, item);
   let mensaje = `Hola, me interesa el servicio "${item.nombre}"`;
   if (item.precio > 0) mensaje += ` (${formatPrecio(item.precio, config.perfil.moneda)}`;
-  if (item.duracion_minutos > 0) mensaje += `${item.precio > 0 ? ', ' : ' ('}${item.duracion_minutos} min`;
+  if (item.duracion_minutos > 0) mensaje += `${item.precio > 0 ? ', ' : ' ('}${formatDuracion(item.duracion_minutos)}`;
   if (item.precio > 0 || item.duracion_minutos > 0) mensaje += ')';
   mensaje += '. ¿Me confirmas la disponibilidad?';
   return buildWhatsAppLink(config, mensaje);
@@ -295,19 +298,30 @@ function aplicarCarrito(config) {
 // Formato de los números (config.perfil.formato_numero); sin valor se usa el del idioma (es).
 // Se fija al cargar la configuración (loadContent) y lo lee formatPrecio.
 let formatoNumero = null;
+let simboloMoneda = null; // config.perfil.simbolo_moneda: sustituye al símbolo de Intl («S/», «S/.», «$/.»…)
 const LOCALE_NUMERO = { 'coma-punto': 'en-US', 'punto-coma': 'de-DE', 'espacio-coma': 'fr-FR' };
+
+// Duración legible: 45 → «45 min», 60 → «1 h», 90 → «1 h 30 min», 120 → «2 h»
+function formatDuracion(minutos) {
+  const total = Math.round(Number(minutos) || 0);
+  if (total < 60) return `${total} min`;
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return m ? `${h} h ${m} min` : `${h} h`;
+}
 
 function formatPrecio(precio, moneda) {
   const codigo = moneda || 'PEN';
   const opciones = { style: 'currency', currency: codigo };
   // La moneda siempre va delante («US$10,00», «PEN 10,00»); Intl en español la pone detrás.
-  const simbolo = new Intl.NumberFormat('es', opciones).formatToParts(precio)
+  const simbolo = simboloMoneda || new Intl.NumberFormat('es', opciones).formatToParts(precio)
     .filter(p => p.type === 'currency').map(p => p.value).join('');
   const numero = new Intl.NumberFormat(LOCALE_NUMERO[formatoNumero] || 'es', opciones).formatToParts(precio)
     .filter(p => p.type !== 'currency' && p.type !== 'literal' && p.type !== 'minusSign')
     .map(p => p.value).join('')
     .replace(/\u202f/g, '\u00a0');
-  const sep = /[\p{L}]$/u.test(simbolo) ? '\u00a0' : '';
+  // Espacio salvo que el símbolo termine en signo de moneda: «S/ 10», «Bs. 10», «PEN 10», pero «$10», «US$10»
+  const sep = /\p{Sc}$/u.test(simbolo) ? '' : '\u00a0';
   return `${simbolo}${sep}${numero}`;
 }
 
@@ -374,6 +388,7 @@ window.app = {
   urlReserva,
   htmlAccion,
   formatPrecio,
+  formatDuracion,
   getCarrito,
   saveCarrito,
   addToCarrito,

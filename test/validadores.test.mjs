@@ -131,6 +131,12 @@ test('config: formato_numero opcional', () => {
   rechaza(() => validateConfig(con('otro')), /formato_numero/);
 });
 
+test('config: simbolo_moneda opcional', () => {
+  const con = valor => { const c = copia(config); c.perfil.simbolo_moneda = valor; return c; };
+  for (const bueno of [undefined, null, '', 'S/', 'S/.', '$/.', 'Bs.', '€']) validateConfig(con(bueno));
+  for (const malo of ['S/.....', ' S/', 5, '<b>']) rechaza(() => validateConfig(con(malo)), /simbolo_moneda/);
+});
+
 test('normalizarConfig: moneda_personalizada válida pasa a ser perfil.moneda', () => {
   const c = copia(config); c.perfil.moneda = 'PEN'; c.perfil.moneda_personalizada = 'UYU';
   assert.equal(normalizarConfig(c).perfil.moneda, 'UYU');

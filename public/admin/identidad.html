@@ -72,6 +72,12 @@
                         </div>
 
                         <div class="form-group">
+                            <label for="perfil-simbolo_moneda">Símbolo en los precios (opcional)</label>
+                            <input type="text" id="perfil-simbolo_moneda" name="perfil-simbolo_moneda" maxlength="6" autocomplete="off" spellcheck="false" placeholder="S/" aria-describedby="ayuda-simbolo-moneda">
+                            <p class="ayuda" id="ayuda-simbolo-moneda">Texto que va delante del precio, por ejemplo S/, S/., $/. o Bs. Si lo dejas vacío se usa el de la moneda elegida.</p>
+                        </div>
+
+                        <div class="form-group">
                             <label for="perfil-formato_numero">Formato de los precios</label>
                             <select id="perfil-formato_numero" name="perfil-formato_numero" aria-describedby="ayuda-formato-numero">
                                 <option value="">Automático (1234,50)</option>
@@ -236,6 +242,7 @@
             const personalizada = String(perfil.moneda_personalizada || '').toUpperCase();
             document.getElementById('perfil-moneda_personalizada').value = personalizada;
             document.getElementById('perfil-formato_numero').value = perfil.formato_numero || '';
+            document.getElementById('perfil-simbolo_moneda').value = perfil.simbolo_moneda || '';
             const codigoSelector = personalizada ? '' : (perfil.moneda || 'PEN');
             const existe = Array.from(selectorMoneda.options).some(o => o.value === codigoSelector);
             selectorMoneda.value = existe ? codigoSelector : (Array.from(selectorMoneda.options).some(o => o.value === 'PEN') ? 'PEN' : selectorMoneda.options[0].value);
@@ -275,6 +282,7 @@
                 moneda: monedaPersonalizada || document.getElementById('perfil-moneda').value,
                 moneda_personalizada: monedaPersonalizada || null,
                 formato_numero: document.getElementById('perfil-formato_numero').value || null,
+                simbolo_moneda: document.getElementById('perfil-simbolo_moneda').value.trim() || null,
                 tipo_catalogo: document.getElementById('perfil-tipo_catalogo').value,
                 reserva_url: document.getElementById('perfil-reserva_url').value.trim() || null,
                 logo_url: document.getElementById('perfil-logo_url').value || null,

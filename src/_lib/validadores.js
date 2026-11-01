@@ -170,6 +170,14 @@ export function validateConfig(data) {
   if (personalizada && !/^[A-Z]{3}$/.test(personalizada)) {
     fail("El campo 'perfil.moneda_personalizada' debe ser un código de 3 letras mayúsculas, por ejemplo UYU");
   }
+  // simbolo_moneda es opcional: texto que precede al precio en vez del que da Intl («S/», «S/.», «$/.», «Bs.»)
+  const simbolo = data.perfil.simbolo_moneda;
+  if (simbolo !== undefined) validateType(simbolo, ['string', 'null'], 'perfil.simbolo_moneda');
+  if (typeof simbolo === 'string' && simbolo !== '') {
+    if (simbolo.length > 6 || simbolo !== simbolo.trim() || /[\u0000-\u001f\u007f<>]/.test(simbolo)) {
+      fail("El campo 'perfil.simbolo_moneda' debe tener hasta 6 caracteres, sin espacios al inicio o al final, por ejemplo S/ o S/.");
+    }
+  }
   // formato_numero es opcional: separadores de miles y decimales; sin valor se usa el del idioma
   const formatoNumero = data.perfil.formato_numero;
   if (formatoNumero !== undefined && formatoNumero !== null
