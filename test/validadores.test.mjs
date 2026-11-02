@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { validateConfig, validateCatalogo, validateLanding, validateFAQ, contraste, normalizarConfig } from '../src/_lib/validadores.js';
+import { colorSobreAcento, colorAcentoUI, validateConfig, validateCatalogo, validateLanding, validateFAQ, contraste, normalizarConfig } from '../src/_lib/validadores.js';
 import { ejemplo, copia } from './ayuda.mjs';
 
 const config = ejemplo('config');
@@ -70,10 +70,15 @@ test('catálogo: reserva_url, ids reservados y precio a consultar', () => {
   rechaza(() => validateCatalogo(conItem({ descripcion: 'a'.repeat(201) })), /200 caracteres/);
 });
 
-test('landing: acento con contraste AA', () => {
+test('landing: cualquier acento vale y el texto se adapta', () => {
   const con = tema => { const l = copia(landing); l.tema = { ...l.tema, ...tema }; return l; };
   validateLanding(con({ color_acento: '#ffd400' }), ids);
-  rechaza(() => validateLanding(con({ color_acento: '#222222' }), ids), /demasiado oscuro/);
+  validateLanding(con({ color_acento: '#222222' }), ids);
+  assert.equal(colorSobreAcento('#222222'), '#ffffff');
+  assert.equal(colorSobreAcento('#b6f23c'), '#12161c');
+  assert.equal(colorAcentoUI('#1d4ed8'), '#1d4ed8');
+  assert.ok(contraste(colorAcentoUI('#ffeb3b'), '#ffffff') >= 3);
+  assert.equal(colorSobreAcento('#1d4ed8'), '#ffffff');
   rechaza(() => validateLanding(con({ color_acento: 'rojo' }), ids), /hexadecimal/);
   validateLanding(con({ color_primario: '#000000', color_secundario: '#ffffff' }), ids);
   assert.ok(contraste('#b6f23c', '#12161c') > 4.5);

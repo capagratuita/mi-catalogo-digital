@@ -1097,25 +1097,21 @@
             document.getElementById('estilo-ayuda').textContent = AYUDA_ESTILO[document.getElementById('landing-tema-estilo').value] || '';
         }
 
-        // Mismo cálculo que el servidor (functions/_lib/validadores.js): texto #12161C sobre el acento, mínimo 4.5:1
-        function contrasteConTinta(hex) {
+        // Mismo criterio que el servidor: texto oscuro o blanco, el que dé más contraste
+        function avisarContraste() {
+            const hex = document.getElementById('landing-tema-acento').value;
             const luz = h => [1, 3, 5].map(i => {
                 const c = parseInt(h.slice(i, i + 2), 16) / 255;
                 return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
             }).reduce((acc, c, i) => acc + c * [0.2126, 0.7152, 0.0722][i], 0);
-            const [claro, oscuro] = [luz(hex), luz('#12161c')].sort((a, b) => b - a);
-            return (claro + 0.05) / (oscuro + 0.05);
-        }
-
-        function avisarContraste() {
-            const input = document.getElementById('landing-tema-acento');
+            const l = luz(hex);
+            const ratio = o => (Math.max(l, luz(o)) + 0.05) / (Math.min(l, luz(o)) + 0.05);
+            const blanco = ratio('#ffffff') > ratio('#12161c');
+            const r = blanco ? ratio('#ffffff') : ratio('#12161c');
             const aviso = document.getElementById('acento-aviso');
-            const ratio = contrasteConTinta(input.value);
-            const cumple = ratio >= 4.5;
-            aviso.textContent = cumple
-                ? `Contraste ${ratio.toFixed(1)}:1: el texto de los botones se lee bien.`
-                : `Contraste ${ratio.toFixed(1)}:1: demasiado oscuro, el texto de los botones no se leería bien. Elige un tono más claro (mínimo 4.5:1).`;
-            aviso.style.color = cumple ? 'var(--ok)' : 'var(--danger)';
+            aviso.textContent = `El texto de los botones será ${blanco ? 'blanco' : 'oscuro'} (contraste ${r.toFixed(1)}:1).`
+                + (r < 4.5 ? ' Es un tono intermedio: el texto se leerá justo; uno más claro o más oscuro se lee mejor.' : '');
+            aviso.style.color = r >= 4.5 ? 'var(--ok)' : 'var(--warn)';
         }
 
         // ---------- Carga ----------

@@ -24,6 +24,8 @@
   --primary: #12161C;
   --primary-hover: color-mix(in srgb, var(--primary) 82%, white);
   --accent: #B6F23C;
+  --accent-ui: var(--accent); /* acento para detalles sobre fondo claro (líneas, foco, marcos); se oscurece si el acento es muy claro */
+  --on-accent: var(--ink); /* texto sobre el acento; el servidor y app.js lo cambian a blanco si hace falta */
   --ok: #0B6B3F;
   --ok-hover: #09582F;
   --ok-bg: #E8F5E9;
@@ -232,7 +234,7 @@ nav .carrito-contador {
   min-height: 48px;
   padding: 0 2rem;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   text-decoration: none;
   border-radius: var(--radius-btn);
   font-weight: 700;
@@ -349,7 +351,7 @@ nav .carrito-contador {
 }
 
 .items-deslizable:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--accent-ui);
   outline-offset: -3px;
 }
 
@@ -386,7 +388,7 @@ nav .carrito-contador {
 }
 
 .deslizable-btn:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--accent-ui);
 }
 
 .item-card {
@@ -419,7 +421,7 @@ nav .carrito-contador {
 }
 
 .item-card:has(h3 a:focus-visible) {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--accent-ui);
   outline-offset: 2px;
 }
 
@@ -624,7 +626,7 @@ nav .carrito-contador {
 }
 
 .mosaico-tile:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--accent-ui);
   outline-offset: 2px;
 }
 
@@ -715,7 +717,7 @@ nav .carrito-contador {
 }
 
 .visor button:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--accent-ui);
   outline-offset: 2px;
 }
 
@@ -901,7 +903,7 @@ nav .carrito-contador {
 
 .producto-actions .btn-primary {
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-weight: 700;
 }
 
@@ -963,7 +965,7 @@ nav .carrito-contador {
   min-height: 48px;
   padding: 0 2rem;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   border: none;
   border-radius: var(--radius-btn);
   font-weight: 700;
@@ -1100,7 +1102,7 @@ nav .carrito-contador {
   padding: 0.75rem 1.5rem;
   margin-top: 1rem;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   border: none;
   border-radius: var(--radius-btn);
   font: inherit;
@@ -1196,7 +1198,7 @@ nav .carrito-contador {
   min-height: 48px;
   padding: 0 2rem;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   text-decoration: none;
   border-radius: var(--radius-btn);
   font-weight: 700;
@@ -1413,7 +1415,7 @@ footer .redes-sociales {
   padding: 0.6rem 1.75rem;
   border-radius: var(--radius-btn);
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-weight: bold;
   text-decoration: none;
 }
@@ -1497,7 +1499,7 @@ footer .redes-sociales {
   width: 40px;
   height: 4px;
   margin: 0.75rem auto 0;
-  background: var(--accent);
+  background: var(--accent-ui);
   border-radius: var(--radius-btn);
 }
 
@@ -1524,7 +1526,7 @@ footer .redes-sociales {
 /* Sobre mí: foto con marco desplazado; sin foto, iniciales */
 .sobre-mi-foto,
 .sobre-mi-iniciales {
-  box-shadow: 10px 10px 0 -2px var(--accent);
+  box-shadow: 10px 10px 0 -2px var(--accent-ui);
 }
 
 .sobre-mi-firma {
@@ -1555,7 +1557,7 @@ footer .redes-sociales {
   height: 2.25rem;
   border-radius: 50%;
   background: var(--accent);
-  color: var(--ink);
+  color: var(--on-accent);
   font-family: Georgia, serif;
   font-size: 2rem;
   line-height: 1;

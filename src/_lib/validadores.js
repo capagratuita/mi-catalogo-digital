@@ -52,9 +52,10 @@ export const ID_RESERVADOS = ['sobre-mi', 'fondo-hero', 'logo'];
 export const MAX_GALERIA = 6;
 export const ID_GALERIA = /^(.+)-g([1-6])$/;
 
-// Color de acento: se usa como fondo de botones con texto --ink (#12161C), así que ese par debe cumplir AA.
+// Color de acento: cualquier tono es válido. El texto sobre los botones es #12161C o blanco,
+// el que dé más contraste (ver colorSobreAcento).
 const COLOR_TINTA = '#12161c';
-const CONTRASTE_MINIMO = 4.5;
+const COLOR_BLANCO = '#ffffff';
 
 function luminancia(hex) {
   const [r, g, b] = [1, 3, 5].map(i => {
@@ -67,6 +68,24 @@ function luminancia(hex) {
 export function contraste(hexA, hexB) {
   const [claro, oscuro] = [luminancia(hexA), luminancia(hexB)].sort((a, b) => b - a);
   return (claro + 0.05) / (oscuro + 0.05);
+}
+
+// Color del texto sobre el acento: tinta oscura salvo que el blanco contraste más.
+export function colorSobreAcento(acento) {
+  return contraste(acento, COLOR_BLANCO) > contraste(acento, COLOR_TINTA) ? COLOR_BLANCO : COLOR_TINTA;
+}
+
+// Acento para detalles sobre fondo blanco (línea de los títulos, foco, marcos): si el acento es muy
+// claro, se mezcla con la tinta hasta llegar a 3:1 con blanco (mínimo AA para elementos gráficos).
+export function colorAcentoUI(acento) {
+  if (contraste(acento, COLOR_BLANCO) >= 3) return acento;
+  const canal = (hex, i) => parseInt(hex.slice(i, i + 2), 16);
+  for (let t = 5; t <= 100; t += 5) {
+    const mezcla = '#' + [1, 3, 5].map(i =>
+      Math.round(canal(acento, i) * (1 - t / 100) + canal(COLOR_TINTA, i) * t / 100).toString(16).padStart(2, '0')).join('');
+    if (contraste(mezcla, COLOR_BLANCO) >= 3) return mezcla;
+  }
+  return COLOR_TINTA;
 }
 
 // URL http(s) absoluta; con { relativa: true } también acepta rutas del propio sitio ("/…").
@@ -471,10 +490,6 @@ export function validateLanding(data, idsCatalogo) {
   if (acento !== undefined && acento !== null) {
     if (typeof acento !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(acento)) {
       fail("El campo 'tema.color_acento' debe ser un color hexadecimal como #B6F23C");
-    }
-    const ratio = contraste(acento, COLOR_TINTA);
-    if (ratio < CONTRASTE_MINIMO) {
-      fail(`El color de acento ${acento} es demasiado oscuro: el texto sobre los botones no se leería bien (contraste ${ratio.toFixed(1)}:1, mínimo ${CONTRASTE_MINIMO}:1). Elige un tono más claro.`);
     }
   }
   if (!['serif', 'sans', 'mono'].includes(data.tema.fuente)) {

@@ -79,7 +79,35 @@ function aplicarTema(tema) {
   }
   if (/^#[0-9a-fA-F]{6}$/.test(tema.color_acento || '')) {
     document.documentElement.style.setProperty('--accent', tema.color_acento);
+    document.documentElement.style.setProperty('--on-accent', colorSobreAcento(tema.color_acento));
+    document.documentElement.style.setProperty('--accent-ui', colorAcentoUI(tema.color_acento));
   }
+}
+
+// Texto sobre el acento: tinta oscura o blanco, el que dé más contraste (igual que el servidor)
+function colorSobreAcento(hex) {
+  const luz = h => [1, 3, 5].map(i => {
+    const c = parseInt(h.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }).reduce((acc, c, i) => acc + c * [0.2126, 0.7152, 0.0722][i], 0);
+  const l = luz(hex);
+  const ratio = otro => (Math.max(l, luz(otro)) + 0.05) / (Math.min(l, luz(otro)) + 0.05);
+  return ratio('#ffffff') > ratio('#12161c') ? '#ffffff' : '#12161c';
+}
+
+// Acento para detalles sobre blanco: se oscurece hasta 3:1 si es muy claro (igual que el servidor)
+function colorAcentoUI(hex) {
+  const luz = h => [1, 3, 5].map(i => {
+    const c = parseInt(h.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }).reduce((acc, c, i) => acc + c * [0.2126, 0.7152, 0.0722][i], 0);
+  const sobreBlanco = h => 1.05 / (luz(h) + 0.05);
+  if (sobreBlanco(hex) >= 3) return hex;
+  for (let t = 5; t <= 100; t += 5) {
+    const m = '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - t / 100) + parseInt('12161c'.slice(i - 1, i + 1), 16) * t / 100).toString(16).padStart(2, '0')).join('');
+    if (sobreBlanco(m) >= 3) return m;
+  }
+  return '#12161c';
 }
 
 // Rellena nombre, pie de página, redes y título con los datos de config.perfil.

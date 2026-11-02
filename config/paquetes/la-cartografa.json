@@ -1,0 +1,409 @@
+{
+  "version": 1,
+  "exportado": "2026-11-02T04:20:39.432Z",
+  "config": {
+    "perfil": {
+      "nombre": "La Cartógrafa",
+      "descripcion_corta": "Cartógrafa de sitios web: mapas de sitio, rutas claras y buenas señales para que Google llegue a cada rincón de tu página, aunque no tengas dominio propio.",
+      "whatsapp": "+00000000000",
+      "whatsapp_usuario": null,
+      "email": null,
+      "moneda": "LEG",
+      "moneda_personalizada": "LEG",
+      "simbolo_moneda": "lg.",
+      "formato_numero": "coma-punto",
+      "tipo_catalogo": "solo-servicios",
+      "reserva_url": "https://t.me/capagratuita_admin",
+      "logo_url": "/api/image?id=logo&v=1",
+      "direccion": null,
+      "redes": {
+        "instagram": null,
+        "facebook": null,
+        "tiktok": null,
+        "youtube": null
+      }
+    }
+  },
+  "catalogo": {
+    "categorias": {
+      "producto": [],
+      "servicio": [
+        "Trazado",
+        "Presentación",
+        "Seguimiento"
+      ]
+    },
+    "categorias_agendamiento": [
+      "Presentación",
+      "Seguimiento"
+    ],
+    "items": [
+      {
+        "id": "mapas-de-sitio",
+        "tipo": "servicio",
+        "nombre": "Mapas de sitio",
+        "descripcion": "Trazo un sitemap.xml con cada página de tu web. Es la lista que Google consulta para llegar a todas sin tener que adivinar.",
+        "precio": 25,
+        "categoria": "Trazado",
+        "disponible": true,
+        "destacado": true,
+        "duracion_minutos": 60,
+        "reserva_url": null,
+        "modalidad": "online",
+        "zona": "",
+        "incluye": [
+          "Un sitemap.xml con todas tus páginas",
+          "Entrega en un archivo listo para subir",
+          "Explicación de cómo mantenerlo al día"
+        ],
+        "variantes": [
+          {
+            "nombre": "Sitio pequeño (hasta 10 páginas)",
+            "precio": 25,
+            "duracion_minutos": 60
+          },
+          {
+            "nombre": "Sitio mediano (hasta 50 páginas)",
+            "precio": 60,
+            "duracion_minutos": 120
+          },
+          {
+            "nombre": "Sitio grande (más de 50 páginas)",
+            "precio": 120,
+            "duracion_minutos": null
+          }
+        ],
+        "galeria": [
+          {
+            "n": 1,
+            "alt": "Mapa del tesoro cuyo tesoro es una lupa sobre una isla con forma de página web"
+          },
+          {
+            "n": 2,
+            "alt": "Velero con un cursor como vela navegando entre islas-ventana sobre olas de señal wifi"
+          },
+          {
+            "n": 3,
+            "alt": "Isla-nube con un icono de casa y puentes de cuerda hacia páginas flotantes"
+          },
+          {
+            "n": 4,
+            "alt": "Rosa de los vientos cuyas puntas son una ventana de navegador, una lupa, un enlace y un cursor"
+          },
+          {
+            "n": 5,
+            "alt": "Telaraña tendida entre islas, con una pluma tejiendo un hilo nuevo"
+          },
+          {
+            "n": 6,
+            "alt": "Mapa enrollado que se despliega en un árbol de páginas, como los ríos de un mapa"
+          }
+        ]
+      },
+      {
+        "id": "rutas-para-robots",
+        "tipo": "servicio",
+        "nombre": "Rutas para robots",
+        "descripcion": "Dejo señales claras para que los buscadores sepan por dónde entrar y qué recorrer. Si el camino está claro, ninguna página queda escondida.",
+        "precio": 40,
+        "categoria": "Trazado",
+        "disponible": true,
+        "destacado": true,
+        "duracion_minutos": 45,
+        "reserva_url": null,
+        "modalidad": "online",
+        "zona": "",
+        "incluye": [
+          "Archivo robots.txt claro",
+          "Revisión de las páginas que deben o no recorrerse"
+        ],
+        "galeria": [
+          {
+            "n": 1,
+            "alt": "Robot de latón leyendo un cartel con flechas"
+          },
+          {
+            "n": 2,
+            "alt": "Bifurcación con un cartel «Pasen» y otro «Privado»"
+          },
+          {
+            "n": 3,
+            "alt": "Robot recorriendo un camino de piedras numeradas"
+          }
+        ]
+      },
+      {
+        "id": "senalizacion",
+        "tipo": "servicio",
+        "nombre": "Señalización",
+        "descripcion": "Escribo títulos y descripciones que dicen, en cada lugar, qué va a encontrar quien llega. Son lo primero que se ve en los resultados de búsqueda.",
+        "precio": 15,
+        "categoria": "Trazado",
+        "disponible": true,
+        "destacado": true,
+        "duracion_minutos": 90,
+        "reserva_url": null,
+        "precio_a_consultar": true,
+        "modalidad": "presencial",
+        "zona": "En la sala de mapas, con tu web a la vista",
+        "incluye": [
+          "Un título por página",
+          "Una descripción por página",
+          "Ajuste de los textos tras la primera revisión"
+        ],
+        "galeria": [
+          {
+            "n": 1,
+            "alt": "Cartel de madera con un título escrito a mano"
+          },
+          {
+            "n": 2,
+            "alt": "Escaparate con una descripción corta bajo cada título"
+          },
+          {
+            "n": 3,
+            "alt": "Cuaderno con borradores de títulos tachados y corregidos"
+          }
+        ]
+      },
+      {
+        "id": "registro-search-console",
+        "tipo": "servicio",
+        "nombre": "Registro en Search Console",
+        "descripcion": "Presento tu página a Google en su propia herramienta, gratis. Sirve una dirección de GitHub Pages: no hace falta dominio propio.",
+        "precio": 30,
+        "categoria": "Presentación",
+        "disponible": true,
+        "destacado": false,
+        "duracion_minutos": 30,
+        "reserva_url": "https://t.me/capagratuita_admin",
+        "modalidad": "ambas",
+        "zona": "Por videollamada o en la sala de mapas",
+        "incluye": [
+          "Alta de tu página en Search Console",
+          "Envío de tu mapa de sitio"
+        ],
+        "galeria": [
+          {
+            "n": 1,
+            "alt": "Puerto con una bandera verde que indica el sitio registrado"
+          },
+          {
+            "n": 2,
+            "alt": "Libro de registro del puerto abierto en la página de tu web"
+          }
+        ]
+      },
+      {
+        "id": "revision-de-rutas",
+        "tipo": "servicio",
+        "nombre": "Revisión de rutas",
+        "descripcion": "Compruebo que tu página aparece en Google y qué búsquedas te traen visitas. Sin promesas de plazo: eso lo decide Google.",
+        "precio": 20,
+        "categoria": "Seguimiento",
+        "disponible": true,
+        "destacado": false,
+        "duracion_minutos": 30,
+        "reserva_url": null,
+        "modalidad": "online",
+        "zona": "",
+        "incluye": [
+          "Comprobación de que tu página aparece en Google",
+          "Informe de las búsquedas que te traen visitas"
+        ],
+        "variantes": [
+          {
+            "nombre": "Revisión única",
+            "precio": 20,
+            "duracion_minutos": 30
+          },
+          {
+            "nombre": "Seguimiento mensual",
+            "precio": 45,
+            "duracion_minutos": null
+          }
+        ],
+        "galeria": [
+          {
+            "n": 1,
+            "alt": "Catalejo apuntando a los resultados de búsqueda"
+          },
+          {
+            "n": 2,
+            "alt": "Bitácora con las búsquedas que traen visitas"
+          },
+          {
+            "n": 3,
+            "alt": "Brújula sobre un informe mensual"
+          },
+          {
+            "n": 4,
+            "alt": "Mapa con marcas verdes en los caminos más recorridos"
+          }
+        ]
+      },
+      {
+        "id": "atlas-completo",
+        "tipo": "servicio",
+        "nombre": "Atlas completo",
+        "descripcion": "Todo el recorrido en un solo encargo: mapa, rutas, señales y registro. Por ahora el atlas está en preparación.",
+        "precio": 0,
+        "categoria": "Trazado",
+        "disponible": false,
+        "destacado": false,
+        "duracion_minutos": 0,
+        "reserva_url": null,
+        "precio_a_consultar": true,
+        "modalidad": "ambas",
+        "zona": "Online y en la sala de mapas",
+        "incluye": [
+          "Mapa de sitio, rutas y señalización",
+          "Registro en Search Console",
+          "Una revisión de rutas al mes"
+        ]
+      }
+    ]
+  },
+  "landing": {
+    "hero": {
+      "titulo": "Dibujo el mapa de tu web para que Google la encuentre.",
+      "subtitulo": "Mapas de sitio, rutas claras y buenas señales para que los buscadores lleguen a cada rincón de tu página, aunque no tengas dominio propio. Sin trucos: con orden.",
+      "cta_texto": "Ver servicios",
+      "cta_enlace": "/#seccion-servicio",
+      "imagen_fondo_url": "/api/image?id=fondo-hero&v=1"
+    },
+    "secciones": [
+      {
+        "tipo": "texto",
+        "titulo": "Cómo trazo tus mapas",
+        "posicion": "antes",
+        "contenido": "Todo mapa empieza por un paseo. Recorro tu web página por página, como quien explora una isla sin cartas, y anoto cada camino, cada cruce y cada callejón sin salida.\n\nDespués dibujo el mapa que Google necesita para no perderse, y dejo señales en cada esquina. Sin trucos y sin prisas: con orden.",
+        "items_ids": []
+      },
+      {
+        "tipo": "destacados",
+        "titulo": "Lo más pedido",
+        "contenido": "",
+        "items_ids": [
+          "mapas-de-sitio",
+          "rutas-para-robots",
+          "senalizacion"
+        ]
+      },
+      {
+        "tipo": "testimonios",
+        "titulo": "Lo que dicen mis vecinos de ficción",
+        "contenido": "",
+        "items_ids": [],
+        "testimonios": [
+          {
+            "texto": "Deduje en tres minutos por qué Google no encontraba mi página: le faltaba un mapa. Mi vecina lo dibujó. Elemental.",
+            "autor": "Sherlock Holmes",
+            "detalle": "Detective consultor"
+          },
+          {
+            "texto": "Dejamos migas de pan por todo el sitio y se las comieron los pájaros. Ella nos enseñó a dejar migas que Google sí sigue.",
+            "autor": "Hansel y Gretel",
+            "detalle": "Exploradores del bosque"
+          },
+          {
+            "texto": "Tardé diez años en volver a casa. Ojalá alguien me hubiera dibujado el mapa antes de zarpar.",
+            "autor": "Ulises",
+            "detalle": "Navegante"
+          },
+          {
+            "texto": "En mi mundo, cada camino llevaba a otro sitio. En mi página, ahora cada enlace lleva a donde dice.",
+            "autor": "Alicia",
+            "detalle": "Visitante de un país muy raro"
+          },
+          {
+            "texto": "Entré al laberinto con un hilo. Ahora mis visitantes entran a mi web con un mapa, y siempre encuentran la salida.",
+            "autor": "Teseo",
+            "detalle": "Héroe de laberintos"
+          },
+          {
+            "texto": "Con mi página perdida en una isla, ella la señalizó. Mis visitas llegaron antes que el próximo barco.",
+            "autor": "Robinson Crusoe",
+            "detalle": "Náufrago con página web"
+          },
+          {
+            "texto": "El lobo me indicó el camino largo. La cartógrafa me dibujó el corto, con carteles y todo.",
+            "autor": "Caperucita Roja",
+            "detalle": "Repartidora de cestas"
+          },
+          {
+            "texto": "Confundí mis molinos con gigantes. Con su revisión de rutas, ya distingo qué es una página y qué es un sueño.",
+            "autor": "Don Quijote",
+            "detalle": "Caballero andante"
+          }
+        ]
+      },
+      {
+        "tipo": "galeria",
+        "titulo": "Del cuaderno de la cartógrafa",
+        "contenido": "",
+        "items_ids": [
+          "mapas-de-sitio",
+          "rutas-para-robots",
+          "senalizacion",
+          "registro-search-console",
+          "revision-de-rutas"
+        ]
+      },
+      {
+        "tipo": "sobre-mi",
+        "titulo": "Sobre mí",
+        "nombre": "La Cartógrafa",
+        "items_ids": [],
+        "contenido": "Soy La Cartógrafa, un personaje de ejemplo de Capa Gratuita, y la vecina de Holmes en este mismo GitHub: él deduce, yo trazo mapas.\n\nMi oficio es antiguo: que nadie se pierda por el camino. En la web, quien necesita el mapa es Google, y se lo dibujo con un archivo sencillo, gratis y sin tocar el diseño.\n\nNada de esto es magia: es orden y paciencia."
+      },
+      {
+        "tipo": "contacto",
+        "titulo": "Contacto",
+        "items_ids": [],
+        "contenido": "¿Quieres que tu página aparezca en el mapa? Escríbeme por Telegram: https://t.me/capagratuita_admin. Atiende el equipo de Capa Gratuita."
+      }
+    ],
+    "tema": {
+      "color_acento": "#2F6B5E",
+      "fuente": "serif",
+      "estilo": "elegante"
+    },
+    "seo": {
+      "titulo": "La Cartógrafa - Sitemaps para que Google encuentre tu web",
+      "descripcion": "Cartógrafa de sitios web: mapas de sitio, rutas claras y buenas señales para que Google llegue a cada rincón de tu página, aunque no tengas dominio propio."
+    }
+  },
+  "faq": {
+    "preguntas": [
+      {
+        "p": "¿Qué es un mapa de sitio (sitemap.xml)?",
+        "r": "Es la lista con cada página de tu web. Google la consulta para llegar a todas sin tener que adivinar."
+      },
+      {
+        "p": "¿Cómo se hizo esta página?",
+        "r": "Con la guía gratuita «Crea y publica tu página web gratis sin tocar código» de Capa Gratuita, sin escribir código."
+      },
+      {
+        "p": "¿Para qué sirven los títulos y las descripciones?",
+        "r": "Dicen qué va a encontrar quien llega a cada página. Son lo primero que se ve en los resultados de búsqueda."
+      },
+      {
+        "p": "¿Necesito dominio propio para aparecer en Google?",
+        "r": "No. Search Console es gratis y sirve una dirección de GitHub Pages."
+      },
+      {
+        "p": "¿Por qué se paga en leguas?",
+        "r": "Porque en mi oficio las distancias se miden en leguas. Es una moneda de fantasía: en tu catálogo puedes poner la tuya."
+      },
+      {
+        "p": "¿Los vecinos que opinan existen?",
+        "r": "Son personajes de ficción, como yo. Nadie cobró por sus opiniones (ni podría)."
+      },
+      {
+        "p": "¿En cuánto tiempo aparecerá mi página en Google?",
+        "r": "No hay promesas de plazo: eso lo decide Google."
+      }
+    ]
+  }
+}

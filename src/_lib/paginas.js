@@ -1,5 +1,5 @@
 import { getContent } from './defaults.js';
-import { TOKEN_ANALITICA } from './validadores.js';
+import { TOKEN_ANALITICA, colorSobreAcento, colorAcentoUI } from './validadores.js';
 import { MAX_DESCRIPCION, localeOg, recortar } from './seo.js';
 
 const EXTENSIONES_FOTO = ['jpg', 'jpeg', 'png', 'webp'];
@@ -104,7 +104,7 @@ export function paginaPublica({ claves, meta, fuente }) {
     // Color de acento de la landing: se pinta desde el servidor para que no parpadee al cargar
     const acento = sitio.landing?.tema?.color_acento;
     const estiloAcento = typeof acento === 'string' && /^#[0-9a-fA-F]{6}$/.test(acento)
-      ? `<style>:root{--accent:${acento}}</style>`
+      ? `<style>:root{--accent:${acento};--on-accent:${colorSobreAcento(acento)};--accent-ui:${colorAcentoUI(acento)}}</style>`
       : '';
 
     // Cloudflare Web Analytics (sin cookies). No se mide el carrito ni las páginas noindex (404).
