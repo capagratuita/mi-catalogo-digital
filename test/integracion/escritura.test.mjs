@@ -180,3 +180,41 @@ test('sitemap: todo lastmod publicado es una fecha ISO válida', async () => {
     if (fecha) assert.match(fecha, /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/, `${ruta}: lastmod «${fecha}»`);
   }
 });
+
+local('fuentes propias: subida con sesión, 401 sin ella, rechazo de lo que no es fuente y servida con su tipo', async () => {
+  const woff = Buffer.concat([Buffer.from('wOFF'), Buffer.alloc(40)]);
+  const enviar = (id, bytes, cookie) => {
+    const form = new FormData();
+    form.set('id', id);
+    form.set('file', new Blob([bytes]), 'fuente');
+    return ctx.get('/api/fuente', { method: 'POST', headers: cookie ? { Cookie: cookie } : {}, body: form });
+  };
+  assert.equal((await enviar('texto-400', woff)).status, 401);
+  assert.equal((await enviar('texto-900', woff, admin.cookie)).status, 400);
+  const gif = await enviar('texto-400', Buffer.from('GIF89a' + 'x'.repeat(40)), admin.cookie);
+  assert.equal(gif.status, 400);
+  assert.match(gif.texto, /WOFF2, WOFF, TTF u OTF/);
+  assert.equal((await enviar('texto-400', Buffer.alloc(1024 * 1024 + 1), admin.cookie)).status, 400);
+
+  const ok = await enviar('texto-400', woff, admin.cookie);
+  assert.equal(ok.status, 200, ok.texto);
+  assert.equal(JSON.parse(ok.texto).formato, 'woff');
+  const r = await ctx.get('/api/fuente?id=texto-400');
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get('content-type'), 'font/woff');
+  assert.match(r.headers.get('cache-control'), /immutable/);
+  assert.equal((await ctx.get('/api/fuente?id=titulos-400')).status, 404);
+  assert.equal((await ctx.get('/api/fuente?id=../x')).status, 404);
+});
+
+local('fuentes propias: la portada inyecta @font-face y variables cuando están guardadas', async () => {
+  const landing = copia(ejemplo('landing'));
+  landing.tema.fuentes_propias = { texto: { nombre: 'Prueba', archivos: [{ peso: '400', formato: 'woff', v: 1 }] } };
+  assert.equal((await admin.put('landing', landing)).status, 200);
+  const r = await ctx.get('/');
+  assert.match(r.texto, /@font-face\{font-family:"Fuente Texto";src:url\("\/api\/fuente\?id=texto-400&v=1"\) format\("woff"\)/);
+  assert.match(r.texto, /rel="preload" href="\/api\/fuente\?id=texto-400&v=1"/);
+  assert.match(r.texto, /--font-body:"Fuente Texto"/);
+  landing.tema.fuentes_propias = { texto: { nombre: 'Prueba', archivos: [{ peso: '500', formato: 'woff', v: 1 }] } };
+  assert.equal((await admin.put('landing', landing)).status, 400);
+});

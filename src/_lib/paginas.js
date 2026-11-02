@@ -1,5 +1,6 @@
 import { getContent } from './defaults.js';
 import { TOKEN_ANALITICA, colorSobreAcento, colorAcentoUI } from './validadores.js';
+import { htmlFuentesPropias } from './fuentes.js';
 import { MAX_DESCRIPCION, localeOg, recortar } from './seo.js';
 
 const EXTENSIONES_FOTO = ['jpg', 'jpeg', 'png', 'webp'];
@@ -115,6 +116,7 @@ export function paginaPublica({ claves, meta, fuente }) {
 
     const cabecera = [
       estiloAcento,
+      htmlFuentesPropias(sitio.landing?.tema),
       analitica,
       datos.titulo ? etiquetasMeta(datos, origen, nombreSitio, localeOg(sitio.config?.perfil?.moneda)) : '',
       `<script type="application/json" id="sitio-datos">${jsonParaScript(sitio)}</script>`,

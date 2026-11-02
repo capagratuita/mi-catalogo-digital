@@ -529,6 +529,19 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <h4 id="fuentes-propias-titulo">Tu propia tipografía (opcional)</h4>
+                        <p class="ayuda" id="fuentes-propias-ayuda">Descarga una familia de <a href="https://fonts.google.com" target="_blank" rel="noopener">Google Fonts</a> (botón «Get font» → «Download all») y sube aquí el .zip tal cual: se usan las versiones Regular y Bold, o la variable si no están. También sirven archivos .woff2, .woff, .ttf u .otf sueltos. Debe incluir tildes y eñes, y tener licencia para usarla en una web (las de Google Fonts la tienen). Cada archivo puede pesar hasta 1 MB.</p>
+                        <div class="form-group">
+                            <label id="fuente-texto-etiqueta">Fuente de toda la página (texto y títulos)</label>
+                            <div id="fuente-texto-subida" role="group" aria-labelledby="fuente-texto-etiqueta"></div>
+                        </div>
+                        <div class="form-group">
+                            <label id="fuente-titulos-etiqueta">Otra fuente solo para los títulos (opcional)</label>
+                            <p class="ayuda">Si la dejas vacía, los títulos usan la fuente de toda la página. Si subes solo esta, únicamente cambian los títulos y el nombre del sitio; el resto del texto conserva la fuente de arriba.</p>
+                            <div id="fuente-titulos-subida" role="group" aria-labelledby="fuente-titulos-etiqueta"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="landing-tema-estilo">Estilo</label>
                         <select id="landing-tema-estilo" name="landing-tema-estilo">
                             <option value="moderno">Moderno</option>
@@ -671,6 +684,11 @@
             };
 
             if (document.getElementById('landing-tema-vista').value === 'deslizable') tema.vista_listas = 'deslizable';
+            if (fuentesPropias.titulos || fuentesPropias.texto) {
+                tema.fuentes_propias = {};
+                if (fuentesPropias.titulos) tema.fuentes_propias.titulos = fuentesPropias.titulos;
+                if (fuentesPropias.texto) tema.fuentes_propias.texto = fuentesPropias.texto;
+            }
 
             const seo = {
                 titulo: document.getElementById('landing-seo-titulo').value,
@@ -1163,6 +1181,10 @@
                 document.getElementById('landing-tema-fuente').value = landing.tema.fuente || 'serif';
                 document.getElementById('landing-tema-estilo').value = landing.tema.estilo || 'moderno';
                 document.getElementById('landing-tema-vista').value = landing.tema.vista_listas === 'deslizable' ? 'deslizable' : 'rejilla';
+                for (const ranura of ['titulos', 'texto']) {
+                    fuentesPropias[ranura] = landing.tema.fuentes_propias?.[ranura] || null;
+                    subidasFuente[ranura]?.cargar(fuentesPropias[ranura]);
+                }
                 document.getElementById('landing-tema-acento').value = landing.tema.color_acento || ACENTO_POR_DEFECTO;
             }
             avisarContraste();
@@ -1265,6 +1287,9 @@
         }
 
         let subidaFondo = null;
+        // Fuentes propias subidas (se guardan con el botón Guardar): { titulos, texto }
+        const fuentesPropias = {};
+        const subidasFuente = {};
 
         document.addEventListener('DOMContentLoaded', function() {
             verificarAuth();
@@ -1275,6 +1300,13 @@
                 pesoMax: 400 * 1024,
                 minimo: { ancho: 1280, alto: 720 }
             });
+
+            for (const ranura of ['titulos', 'texto']) {
+                subidasFuente[ranura] = window.admin.montarSubidaFuente(document.getElementById(`fuente-${ranura}-subida`), {
+                    ranura,
+                    alCambiar: valor => { fuentesPropias[ranura] = valor; marcarModificado(); }
+                });
+            }
 
             document.getElementById('form-landing').addEventListener('submit', guardarLanding);
             document.getElementById('landing-tema-acento').addEventListener('input', avisarContraste);

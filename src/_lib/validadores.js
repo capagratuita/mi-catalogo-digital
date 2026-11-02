@@ -1,6 +1,8 @@
 // Validadores de contenido (config, catalogo, landing, faq). Módulo puro: sin APIs de Cloudflare,
 // para poder probarlo con Node y reutilizarlo desde functions/api/content.js.
 
+import { RANURAS_FUENTE, PESOS_FUENTE, TIPOS_FUENTE } from './fuentes.js';
+
 function fail(message) {
   throw new Error(message);
 }
@@ -489,6 +491,36 @@ export function validateLanding(data, idsCatalogo) {
   const fondoEstilo = data.hero.fondo_estilo;
   if (fondoEstilo !== undefined && fondoEstilo !== null && !['oscuro', 'claro', 'acento'].includes(fondoEstilo)) {
     fail("El campo 'hero.fondo_estilo' debe ser 'oscuro', 'claro' o 'acento'");
+  }
+
+  // tema.fuentes_propias es opcional: { titulos?, texto? }, cada una { nombre, archivos: [{ peso, formato, v }] }.
+  const propias = data.tema.fuentes_propias;
+  if (propias !== undefined && propias !== null) {
+    if (!isPlainObject(propias)) fail("El campo 'tema.fuentes_propias' debe ser un objeto con 'titulos' y/o 'texto'");
+    for (const ranura of Object.keys(propias)) {
+      if (!RANURAS_FUENTE.includes(ranura)) fail(`'tema.fuentes_propias.${ranura}' no existe: usa 'titulos' o 'texto'`);
+      const fuente = propias[ranura];
+      if (fuente === null) continue;
+      const donde = `tema.fuentes_propias.${ranura}`;
+      if (!isPlainObject(fuente)) fail(`El campo '${donde}' debe ser un objeto`);
+      if (typeof fuente.nombre !== 'string' || !fuente.nombre.trim() || fuente.nombre.length > 60 || /[<>"\\]/.test(fuente.nombre)) {
+        fail(`El campo '${donde}.nombre' debe ser un texto de 1 a 60 caracteres sin < > " ni \\`);
+      }
+      if (!Array.isArray(fuente.archivos) || fuente.archivos.length < 1 || fuente.archivos.length > 2) {
+        fail(`El campo '${donde}.archivos' debe tener 1 o 2 archivos (normal y negrita, o una variable)`);
+      }
+      const pesos = new Set();
+      for (const archivo of fuente.archivos) {
+        if (!isPlainObject(archivo) || !PESOS_FUENTE.includes(archivo.peso)) {
+          fail(`Cada archivo de '${donde}' debe tener 'peso' '400', '700' o 'variable'`);
+        }
+        if (!(archivo.formato in TIPOS_FUENTE)) fail(`Cada archivo de '${donde}' debe tener 'formato' woff2, woff, truetype u opentype`);
+        if (!Number.isInteger(archivo.v) || archivo.v < 0) fail(`Cada archivo de '${donde}' debe tener 'v' (número entero)`);
+        if (pesos.has(archivo.peso)) fail(`'${donde}' repite el peso '${archivo.peso}'`);
+        pesos.add(archivo.peso);
+      }
+      if (pesos.has('variable') && pesos.size > 1) fail(`'${donde}' no puede mezclar una fuente variable con otros pesos`);
+    }
   }
 
   // color_acento es opcional. color_primario/secundario antiguos se aceptan pero se ignoran.

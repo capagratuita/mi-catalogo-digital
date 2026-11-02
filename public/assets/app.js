@@ -68,8 +68,17 @@ const FUENTES = {
 // El servidor ya inyecta el acento en <head>; aquí se repite por si la página no pasó por paginaPublica.
 function aplicarTema(tema) {
   if (!tema) return;
-  if (FUENTES[tema.fuente]) {
+  // Fuentes propias subidas desde el admin (el servidor ya inyecta los @font-face): ver src/_lib/fuentes.js
+  const propias = tema.fuentes_propias || {};
+  const respaldo = FUENTES[tema.fuente] || FUENTES.sans;
+  if (propias.texto) {
+    document.documentElement.style.setProperty('--font-body', `"Fuente Texto", ${respaldo}`);
+  } else if (FUENTES[tema.fuente]) {
     document.documentElement.style.setProperty('--font-body', FUENTES[tema.fuente]);
+  }
+  // La fuente «de toda la página» también va en los títulos, salvo que haya una propia para ellos
+  if (propias.titulos || propias.texto) {
+    document.documentElement.style.setProperty('--font-heading', `"${propias.titulos ? 'Fuente Titulos' : 'Fuente Texto'}", ${respaldo}`);
   }
   // Estilo visual (ver styles.css); «moderno» es la base y se queda sin atributo
   if (['rustico', 'minimalista', 'elegante'].includes(tema.estilo)) {

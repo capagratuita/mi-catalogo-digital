@@ -464,3 +464,27 @@ nav .nav-admin {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* Subida de fuentes propias (tipografías) */
+.subida-fuente {
+  margin-top: 0.5rem;
+}
+
+.subida-fuente-vista {
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-box);
+  background: var(--bg-alt);
+}
+
+.subida-fuente-vista[hidden] {
+  display: none;
+}
+
+.subida-fuente-muestra {
+  margin: 0.25rem 0 0;
+  font-size: 1.15rem;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}

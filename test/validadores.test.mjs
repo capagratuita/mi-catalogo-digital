@@ -223,3 +223,17 @@ test('landing: hero.fondo_estilo admite oscuro o claro', () => {
   validateLanding(con('oscuro'), ids);
   rechaza(() => validateLanding(con('rojo'), ids), /fondo_estilo/);
 });
+
+test('landing: fuentes propias', () => {
+  const con = fuentes_propias => { const l = copia(landing); l.tema = { ...l.tema, fuentes_propias }; return l; };
+  const archivo = (peso, extra) => ({ peso, formato: 'woff2', v: 1700000000000, ...extra });
+  validateLanding(con({ titulos: { nombre: 'Lora', archivos: [archivo('400'), archivo('700', { formato: 'woff' })] } }), ids);
+  validateLanding(con({ texto: { nombre: 'Inter', archivos: [archivo('variable')] } }), ids);
+  rechaza(() => validateLanding(con({ cuerpo: { nombre: 'x', archivos: [archivo('400')] } }), ids), /no existe/);
+  rechaza(() => validateLanding(con({ texto: { nombre: '', archivos: [archivo('400')] } }), ids), /nombre/);
+  rechaza(() => validateLanding(con({ texto: { nombre: 'X', archivos: [] } }), ids), /archivos/);
+  rechaza(() => validateLanding(con({ texto: { nombre: 'X', archivos: [archivo('500')] } }), ids), /peso/);
+  rechaza(() => validateLanding(con({ texto: { nombre: 'X', archivos: [archivo('400', { formato: 'exe' })] } }), ids), /formato/);
+  rechaza(() => validateLanding(con({ texto: { nombre: 'X', archivos: [archivo('400'), archivo('400')] } }), ids), /repite/);
+  rechaza(() => validateLanding(con({ texto: { nombre: 'X', archivos: [archivo('variable'), archivo('400')] } }), ids), /variable/);
+});

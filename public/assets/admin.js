@@ -247,6 +247,213 @@ function montarSubidaImagen(contenedor, { id, entrada, ladoMax, pesoMax, transpa
   return { refrescar };
 }
 
+// (leerZip y crearZip están más abajo; las funciones declaradas se pueden usar antes)
+// ---- Fuentes propias (tipografías) ----
+// Elige, de una lista de archivos (los de un .zip de Google Fonts o sueltos), los que usaremos:
+// Regular (400) y Bold (700) estáticos; si no hay, una fuente variable; si no, el único archivo que haya.
+// entradas: [{ nombre, datos: Uint8Array }] -> { nombre, archivos: [{ peso, ext, nombre, datos }], avisos }
+const ORDEN_EXT = ['woff2', 'woff', 'ttf', 'otf'];
+
+function clasificarFuentes(entradas) {
+  const candidatas = entradas
+    .map(({ nombre, datos }) => {
+      const base = nombre.split('/').pop();
+      const m = /\.(woff2|woff|ttf|otf)$/i.exec(base);
+      if (!m || nombre.startsWith('__MACOSX/') || base.startsWith('.')) return null;
+      return { nombre: base, ext: m[1].toLowerCase(), datos };
+    })
+    .filter(Boolean)
+    .filter(f => !/italic|oblique/i.test(f.nombre));
+  if (!candidatas.length) throw new Error('No encontré archivos de fuente (.ttf, .otf, .woff o .woff2) en lo que elegiste.');
+
+  const mejor = lista => [...lista].sort((a, b) => ORDEN_EXT.indexOf(a.ext) - ORDEN_EXT.indexOf(b.ext))[0];
+  const variables = candidatas.filter(f => /\[[^\]]*wght[^\]]*\]|variablefont/i.test(f.nombre));
+  const estaticas = candidatas.filter(f => !variables.includes(f));
+  const normal = estaticas.filter(f => /(^|[-_ ])(regular|book)\./i.test(f.nombre));
+  const negrita = estaticas.filter(f => /(^|[-_ ])bold\./i.test(f.nombre));
+
+  const avisos = [];
+  let elegidas;
+  if (normal.length && negrita.length) {
+    elegidas = [{ peso: '400', ...mejor(normal) }, { peso: '700', ...mejor(negrita) }];
+  } else if (variables.length) {
+    elegidas = [{ peso: 'variable', ...mejor(variables) }];
+  } else if (normal.length) {
+    elegidas = [{ peso: '400', ...mejor(normal) }];
+    avisos.push('No encontré la versión Bold: lo que va en negrita se verá con una negrita simulada, menos bonita.');
+  } else if (candidatas.length === 1) {
+    elegidas = [{ peso: '400', ...candidatas[0] }];
+    avisos.push('Solo hay un archivo: lo que va en negrita se verá con una negrita simulada, menos bonita.');
+  } else {
+    throw new Error('No pude saber cuál es la versión normal (Regular) de la fuente. Elige directamente el archivo que quieras usar.');
+  }
+
+  const nombre = elegidas[0].nombre
+    .replace(/\.[^.]+$/, '')
+    .replace(/\[.*$/, '')
+    .split('-')[0]
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/[<>"\\]/g, '')
+    .trim()
+    .slice(0, 60) || 'Mi fuente';
+  return { nombre, archivos: elegidas, avisos };
+}
+
+// Convierte un .ttf/.otf a WOFF (cada tabla comprimida con zlib, sin librerías): pesa cerca de la mitad.
+// Si no se puede (el navegador no tiene CompressionStream o el archivo no es un TTF/OTF simple) devuelve null.
+async function aWoff(datos) {
+  if (typeof CompressionStream !== 'function' || datos.length < 12) return null;
+  const vista = new DataView(datos.buffer, datos.byteOffset, datos.byteLength);
+  const version = vista.getUint32(0);
+  if (![0x00010000, 0x4f54544f, 0x74727565].includes(version)) return null; // ttcf (colecciones) y demás: sin convertir
+  const n = vista.getUint16(4);
+  const tablas = [];
+  for (let i = 0; i < n; i++) {
+    const pos = 12 + i * 16;
+    const tabla = {
+      etiqueta: datos.subarray(pos, pos + 4),
+      suma: vista.getUint32(pos + 4),
+      largo: vista.getUint32(pos + 12),
+      origen: vista.getUint32(pos + 8),
+    };
+    if (tabla.origen + tabla.largo > datos.length) return null;
+    const bruto = datos.subarray(tabla.origen, tabla.origen + tabla.largo);
+    const flujo = new Blob([bruto]).stream().pipeThrough(new CompressionStream('deflate'));
+    const comprimido = new Uint8Array(await new Response(flujo).arrayBuffer());
+    tabla.datos = comprimido.length < bruto.length ? comprimido : bruto;
+    tablas.push(tabla);
+  }
+  const relleno = x => (x + 3) & ~3;
+  let total = 44 + 20 * n;
+  const desplazamientos = tablas.map(t => { const o = total; total += relleno(t.datos.length); return o; });
+  const salida = new Uint8Array(total);
+  const v = new DataView(salida.buffer);
+  salida.set([0x77, 0x4f, 0x46, 0x46]); // «wOFF»
+  v.setUint32(4, version);
+  v.setUint32(8, total);
+  v.setUint16(12, n);
+  v.setUint32(16, 12 + 16 * n + tablas.reduce((suma, t) => suma + relleno(t.largo), 0));
+  tablas.forEach((t, i) => {
+    const pos = 44 + i * 20;
+    salida.set(t.etiqueta, pos);
+    v.setUint32(pos + 4, desplazamientos[i]);
+    v.setUint32(pos + 8, t.datos.length);
+    v.setUint32(pos + 12, t.largo);
+    v.setUint32(pos + 16, t.suma);
+    salida.set(t.datos, desplazamientos[i]);
+  });
+  return salida;
+}
+
+// Selector de fuente para «Títulos» o «Texto»: acepta el .zip que se descarga de Google Fonts o archivos sueltos,
+// elige Regular y Bold (o la variable), los pasa a WOFF y los sube a POST /api/fuente.
+// opciones: { ranura: 'titulos'|'texto', alCambiar(valor|null) }; valor = { nombre, archivos: [{ peso, formato, v }] }
+// Devuelve { cargar(valor) } para pintar lo que ya estaba guardado. Se guarda con el botón Guardar de la página.
+function montarSubidaFuente(contenedor, { ranura, alCambiar }) {
+  const MAX_BYTES = 1024 * 1024;
+  contenedor.classList.add('subida-fuente');
+  const vista = document.createElement('div');
+  vista.className = 'subida-fuente-vista';
+  vista.hidden = true;
+  const etiquetaVista = document.createElement('p');
+  etiquetaVista.className = 'ayuda';
+  const muestra = document.createElement('p');
+  muestra.className = 'subida-fuente-muestra';
+  muestra.textContent = 'Dibujo el mapa de tu web: 0123456789';
+  const muestraNegrita = document.createElement('p');
+  muestraNegrita.className = 'subida-fuente-muestra';
+  muestraNegrita.style.fontWeight = '700';
+  muestraNegrita.textContent = 'Así se ve en negrita';
+  vista.append(etiquetaVista, muestra, muestraNegrita);
+
+  const archivo = document.createElement('input');
+  archivo.type = 'file';
+  archivo.multiple = true;
+  archivo.accept = '.zip,.woff2,.woff,.ttf,.otf';
+  archivo.setAttribute('aria-label', 'Elegir el .zip de Google Fonts o archivos de fuente');
+  const subir = document.createElement('button');
+  subir.type = 'button';
+  subir.className = 'btn-mini';
+  subir.textContent = 'Subir fuente';
+  subir.disabled = true;
+  const quitar = document.createElement('button');
+  quitar.type = 'button';
+  quitar.className = 'btn-mini';
+  quitar.textContent = 'Quitar';
+  quitar.hidden = true;
+  const estado = document.createElement('p');
+  estado.className = 'ayuda';
+  estado.setAttribute('role', 'status');
+  const fila = document.createElement('div');
+  fila.className = 'subida-imagen-acciones';
+  fila.append(archivo, subir, quitar);
+  contenedor.append(vista, fila, estado);
+
+  const estilo = document.createElement('style');
+  document.head.appendChild(estilo);
+  const familia = `Vista previa ${ranura}`;
+  muestra.style.fontFamily = muestraNegrita.style.fontFamily = `"${familia}", sans-serif`;
+
+  function mostrar(valor) {
+    quitar.hidden = !valor;
+    vista.hidden = !valor;
+    if (!valor) { estilo.textContent = ''; return; }
+    etiquetaVista.textContent = `Fuente: ${valor.nombre}`;
+    estilo.textContent = valor.archivos.map(a =>
+      `@font-face{font-family:"${familia}";src:url("/api/fuente?id=${ranura}-${a.peso}&v=${a.v}") format("${a.formato}");font-weight:${a.peso === 'variable' ? '100 900' : a.peso};font-display:swap}`
+    ).join('');
+  }
+
+  archivo.addEventListener('change', () => { subir.disabled = !archivo.files.length; });
+  quitar.addEventListener('click', () => {
+    mostrar(null);
+    alCambiar(null);
+    estado.textContent = 'Fuente quitada. Pulsa Guardar para aplicar el cambio.';
+  });
+  subir.addEventListener('click', async () => {
+    subir.disabled = true;
+    subir.textContent = 'Subiendo…';
+    try {
+      const entradas = [];
+      for (const f of archivo.files) {
+        if (/\.zip$/i.test(f.name)) entradas.push(...await leerZip(await f.arrayBuffer()));
+        else entradas.push({ nombre: f.name, datos: new Uint8Array(await f.arrayBuffer()) });
+      }
+      const { nombre, archivos, avisos } = clasificarFuentes(entradas);
+
+      const subidos = [];
+      for (const elegido of archivos) {
+        let datos = elegido.datos;
+        if (elegido.ext === 'ttf' || elegido.ext === 'otf') datos = (await aWoff(datos)) || datos;
+        if (datos.length > MAX_BYTES) {
+          throw new Error(`«${elegido.nombre}» pesa ${Math.round(datos.length / 1024)} KB y el máximo es 1024 KB. Prueba con una fuente más ligera (las versiones Regular y Bold pesan menos que la variable).`);
+        }
+        const formulario = new FormData();
+        formulario.append('id', `${ranura}-${elegido.peso}`);
+        formulario.append('file', new File([datos], 'fuente', { type: 'application/octet-stream' }));
+        const respuesta = await fetch('/api/fuente', { method: 'POST', body: formulario });
+        const cuerpo = await respuesta.json().catch(() => ({}));
+        if (!respuesta.ok) throw new Error(cuerpo.detalle || cuerpo.error || 'No se pudo subir la fuente');
+        subidos.push({ peso: elegido.peso, formato: cuerpo.formato, v: Date.now(), kb: Math.round(cuerpo.bytes / 1024) });
+      }
+      const valor = { nombre, archivos: subidos.map(({ peso, formato, v }) => ({ peso, formato, v })) };
+      mostrar(valor);
+      alCambiar(valor);
+      archivo.value = '';
+      const pesos = subidos.map(s => s.peso === 'variable' ? 'variable' : s.peso === '700' ? 'negrita' : 'normal').join(' y ');
+      estado.textContent = `Fuente «${nombre}» subida (${pesos}, ${subidos.reduce((t, s) => t + s.kb, 0)} KB). Pulsa Guardar para aplicarla. `
+        + 'Comprueba que tengas licencia para usarla en una web.'
+        + (avisos.length ? ' ' + avisos.join(' ') : '');
+    } catch (error) {
+      estado.textContent = error.message || 'No se pudo subir la fuente. Inténtalo de nuevo.';
+      subir.disabled = !archivo.files.length;
+    } finally {
+      subir.textContent = 'Subir fuente';
+    }
+  });
+  return { cargar: valor => { mostrar(valor || null); } };
+}
+
 // ---- ZIP mínimo (sin compresión) para descargar las fotos sin librerías ----
 const TABLA_CRC = (() => {
   const tabla = new Uint32Array(256);
@@ -366,16 +573,38 @@ async function leerZip(buffer) {
 // catálogo (importa antes el respaldo .json). Devuelve [{ id, ok, error? }].
 async function importarFotos(archivoZip, alProgreso = () => {}) {
   const TIPOS = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
-  const entradas = (await leerZip(await archivoZip.arrayBuffer()))
+  const todas = await leerZip(await archivoZip.arrayBuffer());
+  const fuentes = todas
+    .map(({ nombre, datos }) => {
+      const m = /^fuentes\/((?:titulos|texto)-(?:400|700|variable))\.(?:woff2|woff|ttf|otf)$/i.exec(nombre);
+      return m ? { id: m[1].toLowerCase(), datos } : null;
+    })
+    .filter(Boolean);
+  const entradas = todas
     .map(({ nombre, datos }) => {
       const base = nombre.split('/').pop();
       const m = /^([a-z0-9-]+)\.(jpg|jpeg|png|webp)$/i.exec(base);
       return m && !nombre.startsWith('__MACOSX/') ? { id: m[1].toLowerCase(), tipo: TIPOS[m[2].toLowerCase()], datos } : null;
     })
     .filter(Boolean);
-  if (!entradas.length) throw new Error('El .zip no contiene fotos con el formato esperado (por ejemplo fotos/mi-servicio.jpg).');
+  if (!entradas.length && !fuentes.length) throw new Error('El .zip no contiene fotos con el formato esperado (por ejemplo fotos/mi-servicio.jpg).');
 
   const resultados = [];
+  for (const { id, datos } of fuentes) {
+    const formulario = new FormData();
+    formulario.append('id', id);
+    formulario.append('file', new File([datos], id, { type: 'application/octet-stream' }));
+    try {
+      const respuesta = await fetch('/api/fuente', { method: 'POST', body: formulario });
+      if (respuesta.ok) resultados.push({ id: `fuente ${id}`, ok: true });
+      else {
+        const error = await respuesta.json().catch(() => ({}));
+        resultados.push({ id: `fuente ${id}`, ok: false, error: error.detalle || error.error || `Error ${respuesta.status}` });
+      }
+    } catch {
+      resultados.push({ id: `fuente ${id}`, ok: false, error: 'No se pudo conectar' });
+    }
+  }
   for (const [i, { id, tipo, datos }] of entradas.entries()) {
     alProgreso(i + 1, entradas.length);
     const formulario = new FormData();
@@ -425,6 +654,18 @@ async function exportarFotos(alProgreso = () => {}) {
     }
   };
   await Promise.all(Array.from({ length: 4 }, trabajador));
+
+  // Fuentes propias: van en la carpeta fuentes/ del mismo .zip
+  const EXT_FUENTE = { 'font/woff2': 'woff2', 'font/woff': 'woff', 'font/ttf': 'ttf', 'font/otf': 'otf' };
+  for (const id of ['titulos-400', 'titulos-700', 'titulos-variable', 'texto-400', 'texto-700', 'texto-variable']) {
+    try {
+      const respuesta = await fetch(`/api/fuente?id=${id}`, { cache: 'no-store' });
+      if (respuesta.ok) {
+        const ext = EXT_FUENTE[(respuesta.headers.get('Content-Type') || '').split(';')[0]];
+        if (ext) archivos.push({ nombre: `fuentes/${id}.${ext}`, datos: new Uint8Array(await respuesta.arrayBuffer()) });
+      }
+    } catch { /* una fuente que falla se omite */ }
+  }
 
   if (!archivos.length) throw new Error('Todavía no hay fotos subidas.');
   archivos.sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -532,6 +773,9 @@ window.admin = {
   optimizarImagen,
   subirFoto,
   montarSubidaImagen,
+  montarSubidaFuente,
+  clasificarFuentes,
+  aWoff,
   exportarTodo,
   exportarFotos,
   importarFotos,

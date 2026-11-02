@@ -258,8 +258,8 @@ src/
   _middleware.js
   index.js, faq.js, carrito.js, producto.js, producto/[id].js, servicio/[id].js   # páginas con SEO y datos inyectados
   sitemap.xml.js, robots.txt.js
-  _lib/{auth,defaults,cache,paginas,validadores,intentos,seo,ficha}.js
-  api/{content,defaults,login,logout,session,upload,image}.js
+  _lib/{auth,defaults,cache,paginas,validadores,intentos,seo,ficha,fuentes}.js
+  api/{content,defaults,login,logout,session,upload,image,fuente}.js
 config/*.example.json, config/paquetes/*.json
 docs/                                                 # checklist E2E, registro de fricciones
 test/*.test.mjs, test/integracion/
@@ -278,6 +278,8 @@ Una ruta dinámica nueva se añade en las tablas de `src/worker.js` **y** en `as
 | `POST /api/login` | pública | `{password}`; fija la cookie `admin_session`. 429 tras 5 fallos en 15 min por IP. |
 | `POST /api/logout`, `GET /api/session` | sesión | Cierra / comprueba la sesión. |
 | `POST /api/upload` | sesión | Foto (JPEG/PNG/WebP, ≤5 MB) de un item o de su galería, o una imagen reservada del sitio (`sobre-mi`, `logo`, `fondo-hero`). |
+| `POST /api/fuente` | sesión | Fuente propia (WOFF2, WOFF, TTF u OTF, ≤1 MB) para los títulos o el texto. |
+| `GET /api/fuente?id=…` | pública | Sirve la fuente desde KV. |
 | `GET /api/image?id=…` | pública | Sirve la foto desde KV. |
 | `GET /api/defaults?key=…` | pública | Devuelve el ejemplo de esa key (solo lectura). |
 

@@ -5,6 +5,7 @@
 import { onRequest as middleware } from './_middleware.js';
 import * as content from './api/content.js';
 import * as defaults from './api/defaults.js';
+import * as fuente from './api/fuente.js';
 import * as image from './api/image.js';
 import * as login from './api/login.js';
 import * as logout from './api/logout.js';
@@ -31,6 +32,7 @@ const EXACTAS = new Map([
   ['/robots.txt', robots],
   ['/api/content', content],
   ['/api/defaults', defaults],
+  ['/api/fuente', fuente],
   ['/api/image', image],
   ['/api/login', login],
   ['/api/logout', logout],

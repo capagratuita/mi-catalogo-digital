@@ -23,7 +23,7 @@ export const onRequest = async ({ request, env, next }) => {
   const isAdminLogin = ADMIN_LOGIN_PATHS.has(path);
   const isProtectedWrite =
     (request.method === 'PUT' && path === '/api/content') ||
-    (request.method === 'POST' && path === '/api/upload');
+    (request.method === 'POST' && (path === '/api/upload' || path === '/api/fuente'));
 
   if ((isAdminPage && !isAdminLogin) || isProtectedWrite) {
     const authenticated = await verifySession(request, env);
