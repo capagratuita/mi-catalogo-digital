@@ -160,8 +160,14 @@
 
                 if (esUrlFondoValida(hero.imagen_fondo_url)) {
                     heroSection.classList.add('hero-imagen');
-                    heroSection.style.backgroundColor = 'var(--primary)';
-                    heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url("${hero.imagen_fondo_url}")`;
+                    const conAcento = hero.fondo_estilo === 'acento';
+                    const claro = conAcento || hero.fondo_estilo === 'claro';
+                    heroSection.classList.toggle('hero-claro', claro);
+                    const velo = claro ? 'rgba(255,255,255,0.86)' : 'rgba(0,0,0,0.45)';
+                    // «acento»: sobre el velo blanco, una capa tenue del color de acento
+                    const tinte = conAcento ? 'linear-gradient(color-mix(in srgb, var(--accent-ui) 16%, transparent), color-mix(in srgb, var(--accent-ui) 16%, transparent)), ' : '';
+                    heroSection.style.backgroundColor = claro ? 'var(--bg)' : 'var(--primary)';
+                    heroSection.style.backgroundImage = `${tinte}linear-gradient(${velo}, ${velo}), url("${hero.imagen_fondo_url}")`;
                     heroSection.style.backgroundSize = 'cover';
                     heroSection.style.backgroundPosition = 'center';
                 }

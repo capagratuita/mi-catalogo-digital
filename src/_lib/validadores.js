@@ -485,6 +485,12 @@ export function validateLanding(data, idsCatalogo) {
     },
   });
 
+  // hero.fondo_estilo es opcional: «oscuro» (por defecto, velo negro y texto blanco) «claro» (velo blanco y texto oscuro) o «acento» (velo claro teñido con el color de acento).
+  const fondoEstilo = data.hero.fondo_estilo;
+  if (fondoEstilo !== undefined && fondoEstilo !== null && !['oscuro', 'claro', 'acento'].includes(fondoEstilo)) {
+    fail("El campo 'hero.fondo_estilo' debe ser 'oscuro', 'claro' o 'acento'");
+  }
+
   // color_acento es opcional. color_primario/secundario antiguos se aceptan pero se ignoran.
   const acento = data.tema.color_acento;
   if (acento !== undefined && acento !== null) {

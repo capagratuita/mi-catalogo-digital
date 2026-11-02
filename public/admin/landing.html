@@ -500,7 +500,16 @@
                         <label for="landing-hero-imagen_fondo_url">Imagen de fondo (opcional)</label>
                         <input type="text" inputmode="url" id="landing-hero-imagen_fondo_url" name="landing-hero-imagen_fondo_url" placeholder="https://ejemplo.com/imagen.jpg o sube una imagen" aria-describedby="ayuda-fondo">
                         <div id="fondo-subida"></div>
-                        <p class="ayuda" id="ayuda-fondo">Recomendado: horizontal de 1920 × 1080 px (mínimo 1280 × 720), JPG o WebP. Se recorta desde el centro y se oscurece un poco para que el texto se lea, así que pon lo importante en el medio y evita texto dentro de la imagen. Al subirla se ajusta a 1920 px y unos 400 KB.</p>
+                        <p class="ayuda" id="ayuda-fondo">Recomendado: horizontal de 1920 × 1080 px (mínimo 1280 × 720), JPG o WebP. Se recorta desde el centro y se cubre con un velo para que el texto se lea (ver «Velo» abajo), así que pon lo importante en el medio y evita texto dentro de la imagen. Al subirla se ajusta a 1920 px y unos 400 KB.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="landing-hero-fondo_estilo">Velo sobre la imagen</label>
+                        <select id="landing-hero-fondo_estilo" name="landing-hero-fondo_estilo" aria-describedby="ayuda-velo">
+                            <option value="oscuro">Oscuro (texto blanco)</option>
+                            <option value="claro">Claro (texto oscuro)</option>
+                            <option value="acento">Claro con tono del acento (texto oscuro)</option>
+                        </select>
+                        <p class="ayuda" id="ayuda-velo">Elige «Claro» (o «con tono del acento», que lo tiñe suavemente con tu color) si tu página es de colores claros o la imagen es oscura y el botón de acento se pierde: la imagen queda como marca de agua y el texto se ve oscuro.</p>
                     </div>
                 </div>
 
@@ -630,6 +639,9 @@
                 cta_enlace: document.getElementById('landing-hero-cta_enlace').value,
                 imagen_fondo_url: document.getElementById('landing-hero-imagen_fondo_url').value.trim() || null
             };
+            // Solo se guarda cuando no es el valor por defecto
+            const estiloFondo = document.getElementById('landing-hero-fondo_estilo').value;
+            if (estiloFondo !== 'oscuro') hero.fondo_estilo = estiloFondo;
 
             const salida = secciones.map(s => {
                 const seccion = {
@@ -1139,6 +1151,7 @@
                 document.getElementById('landing-hero-cta_texto').value = landing.hero.cta_texto || '';
                 asignarEnlaceCta(landing.hero.cta_enlace);
                 document.getElementById('landing-hero-imagen_fondo_url').value = landing.hero.imagen_fondo_url || '';
+                document.getElementById('landing-hero-fondo_estilo').value = ['claro', 'acento'].includes(landing.hero.fondo_estilo) ? landing.hero.fondo_estilo : 'oscuro';
                 subidaFondo?.refrescar();
             }
 

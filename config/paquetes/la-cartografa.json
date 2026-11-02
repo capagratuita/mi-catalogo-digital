@@ -270,7 +270,8 @@
       "subtitulo": "Mapas de sitio, rutas claras y buenas señales para que los buscadores lleguen a cada rincón de tu página, aunque no tengas dominio propio. Sin trucos: con orden.",
       "cta_texto": "Ver servicios",
       "cta_enlace": "/#seccion-servicio",
-      "imagen_fondo_url": "/api/image?id=fondo-hero&v=1"
+      "imagen_fondo_url": "/api/image?id=fondo-hero&v=1",
+      "fondo_estilo": "acento"
     },
     "secciones": [
       {

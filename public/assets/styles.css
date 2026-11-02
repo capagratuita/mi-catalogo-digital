@@ -25,6 +25,7 @@
   --primary-hover: color-mix(in srgb, var(--primary) 82%, white);
   --accent: #B6F23C;
   --accent-ui: var(--accent); /* acento para detalles sobre fondo claro (líneas, foco, marcos); se oscurece si el acento es muy claro */
+  --accent-hover: color-mix(in srgb, var(--accent) 72%, black); /* acento al pasar el cursor: lo bastante más oscuro para notarse incluso con acentos oscuros */
   --on-accent: var(--ink); /* texto sobre el acento; el servidor y app.js lo cambian a blanco si hace falta */
   --ok: #0B6B3F;
   --ok-hover: #09582F;
@@ -242,7 +243,7 @@ nav .carrito-contador {
 }
 
 .hero .btn:hover {
-  background: color-mix(in srgb, var(--accent) 85%, black);
+  background: var(--accent-hover);
   box-shadow: var(--shadow-btn);
 }
 
@@ -253,6 +254,15 @@ nav .carrito-contador {
 
 .hero.hero-imagen p {
   color: rgba(255, 255, 255, 0.9);
+}
+
+/* Velo claro: la imagen queda como marca de agua y el texto sigue siendo oscuro */
+.hero.hero-imagen.hero-claro {
+  color: var(--ink);
+}
+
+.hero.hero-imagen.hero-claro p {
+  color: var(--ink-soft);
 }
 
 /* Catálogo */
@@ -908,7 +918,7 @@ nav .carrito-contador {
 }
 
 .producto-actions .btn-primary:hover {
-  background: color-mix(in srgb, var(--accent) 85%, black);
+  background: var(--accent-hover);
 }
 
 .producto-actions .btn-secondary {
@@ -974,7 +984,7 @@ nav .carrito-contador {
 }
 
 .producto-calendly .btn:hover {
-  background: color-mix(in srgb, var(--accent) 85%, black);
+  background: var(--accent-hover);
 }
 
 /* Cart page */
@@ -1114,7 +1124,7 @@ nav .carrito-contador {
 }
 
 .carrito-resumen .btn:hover {
-  background: color-mix(in srgb, var(--accent) 85%, black);
+  background: var(--accent-hover);
 }
 
 /* FAQ */
@@ -1205,7 +1215,7 @@ nav .carrito-contador {
 }
 
 .faq-contacto .btn:hover {
-  background: color-mix(in srgb, var(--accent) 85%, black);
+  background: var(--accent-hover);
 }
 
 footer {
@@ -1765,4 +1775,68 @@ html[data-estilo="elegante"] .landing-seccion { padding-top: 5rem; padding-botto
 footer .footer-direccion {
   font-style: normal;
   margin-top: 0.25rem;
+}
+
+/* Tarjetas con enlace (servicios): al pasar el ratón se resaltan con el color de acento.
+   Va al final para imponerse a los estilos del tema (minimalista, rústico, elegante). */
+html .item-card:not(.item-card-estatica) {
+  cursor: pointer;
+}
+
+html .item-card:not(.item-card-estatica):hover,
+html .item-card:not(.item-card-estatica):has(h3 a:focus-visible) {
+  border-color: var(--accent-ui);
+  outline: 2px solid var(--accent-ui);
+  outline-offset: -1px;
+  background: color-mix(in srgb, var(--accent-ui) 7%, var(--card));
+}
+
+html .item-card:not(.item-card-estatica):hover h3 a {
+  color: var(--accent-ui);
+}
+
+/* Galería: la foto y el nombre se resaltan con el acento al pasar el ratón o enfocar con teclado */
+.galeria-item img {
+  transition: outline-color 0.15s ease-in-out, filter 0.15s ease-in-out;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.galeria-item:hover img,
+.galeria-item:focus-visible img {
+  outline-color: var(--accent-ui);
+}
+
+.galeria-item:hover span,
+.galeria-item:focus-visible span {
+  color: var(--accent-ui);
+}
+
+.galeria-item:focus-visible {
+  outline: none;
+}
+
+/* Acción de las tarjetas: al pasar el cursor se rellena con el acento (antes se ponía negra) */
+html .item-card .btn-ver:hover,
+html .item-card .btn-calendly:hover,
+html .item-card .btn-add-to-cart:hover,
+html .item-card .btn-ver:focus-visible,
+html .item-card .btn-calendly:focus-visible,
+html .item-card .btn-add-to-cart:focus-visible {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+/* Botones de acento (ficha, hero, contacto): el cambio al pasar el cursor se nota también con acentos oscuros */
+.producto-calendly .btn:hover,
+.producto-actions .btn-primary:hover,
+.hero .btn:hover,
+.btn-contacto:hover {
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-btn);
+}
+
+.btn-contacto {
+  transition: background-color 0.2s, box-shadow 0.2s;
 }

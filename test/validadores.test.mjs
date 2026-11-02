@@ -215,3 +215,11 @@ test('landing: las secciones únicas no se pueden repetir', () => {
   validateLanding(con('destacados'), ids);
   validateLanding(con('galeria'), ids);
 });
+
+test('landing: hero.fondo_estilo admite oscuro o claro', () => {
+  const con = fondo => { const l = copia(landing); l.hero = { ...l.hero, fondo_estilo: fondo }; return l; };
+  validateLanding(con('claro'), ids);
+  validateLanding(con('acento'), ids);
+  validateLanding(con('oscuro'), ids);
+  rechaza(() => validateLanding(con('rojo'), ids), /fondo_estilo/);
+});
